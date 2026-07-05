@@ -43,6 +43,8 @@ struct chip8_machine {
 };
 
 struct chip8_machine *chip8_machine_create(void);
-
 void chip8_machine_load_font(struct chip8_machine *const m, uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
+void chip8_machine_fetch(struct chip8 *const m);
+void chip8_machine_decode_and_exec(struct chip8 *const m);
+
 #endif
