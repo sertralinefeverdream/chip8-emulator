@@ -20,7 +20,14 @@
 #define CHIP8_FONTSET_FINAL 0x09F
 #define CHIP8_FONTSET_MAX_SIZE ((CHIP8_FONTSET_FINAL) - (CHIP8_FONTSET_START) + 1) 
 
-struct chip8_instruction {};
+struct chip8_instruction {
+    uint8_t opcode;
+    uint8_t x; // The second nibble of the instr
+    uint8_t y; // Third nibble
+    uint8_t n; // Fourth nibble
+    uint8_t nn; // The second byte (third and fourth nibbles)
+    uint16_t nnn; // The second, third and fourth nibbles. (12-bit memory addr)
+};
 
 struct chip8_machine { 
     struct chip8_instruction current_instruction;
