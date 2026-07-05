@@ -12,10 +12,13 @@
 
 // Special Addresses
 #define CHIP8_PROGRAM_START 0x200
+#define CHIP8_PROGRAM_FINAL 0xFFF
+#define CHIP8_PROGRAM_MAX_SIZE ((CHIP8_PROGRAM_END) - (CHIP8_PROGRAM_START) + 1)
 #define CHIP8_RESERVED_START 0x000
 #define CHIP8_RESERVED_FINAL 0x1FF
-#define CHIP8_FONT_START 0x050
-#define CHIP8_FONT_FINAL 0x09F
+#define CHIP8_FONTSET_START 0x050
+#define CHIP8_FONTSET_FINAL 0x09F
+#define CHIP8_FONTSET_MAX_SIZE ((CHIP8_FONTSET_FINAL) - (CHIP8_FONTSET_START) + 1) 
 
 struct chip8_instruction {};
 
@@ -33,4 +36,6 @@ struct chip8_machine {
 };
 
 struct chip8_machine *chip8_machine_create(void);
+
+void chip8_machine_load_font(struct chip8_machine *const m, uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
 #endif
