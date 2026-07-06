@@ -20,8 +20,47 @@
 #define CHIP8_FONTSET_FINAL 0x09F
 #define CHIP8_FONTSET_MAX_SIZE ((CHIP8_FONTSET_FINAL) - (CHIP8_FONTSET_START) + 1) 
 
+enum chip8_instruction_type {
+    UNKNOWN, // Placeholder for unsuccessful decoding
+    SYS,
+    CLS, 
+    RET,  
+    JP_A, 
+    CALL_A,
+    SE_V_B,
+    SNE_V_B,  
+    SE_V_V,  
+    LD_V_B, 
+    ADD_V_B,
+    LD_V_V, 
+    OR_V_V, 
+    AND_V_V,
+    XOR_V_V,
+    ADD_V_V,
+    SUB_V_V,
+    SHR_V_V,
+    SUBN_V_V,
+    SHL_V_V,
+    SNE_V_V,
+    LD_I_A,
+    JP_V_A,
+    RND_V_B,
+    DRW_V_V_N,
+    SKP_V,
+    SKNP_V,
+    LD_V_DT,
+    LD_V_K,
+    LD_DT_V,
+    LD_ST_V,
+    ADD_I_V,
+    LD_F_V,
+    LD_B_V,
+    LD_I_V,
+    LD_V_I,
+};
+
 struct chip8_instruction {
-    uint8_t opcode;
+    enum chip8_instruction_type type; // First nibble omitted.
     uint8_t x; // The second nibble of the instr
     uint8_t y; // Third nibble
     uint8_t n; // Fourth nibble
@@ -44,7 +83,7 @@ struct chip8_machine {
 
 struct chip8_machine *chip8_machine_create(void);
 void chip8_machine_load_font(struct chip8_machine *const m, uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
-void chip8_machine_fetch(struct chip8 *const m);
-void chip8_machine_decode_and_exec(struct chip8 *const m);
+void chip8_machine_fetch_and_decode(struct chip8 *const m);
+void chip8_machine_execute(struct chip8 *const m);
 
 #endif
