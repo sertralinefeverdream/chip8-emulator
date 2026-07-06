@@ -454,5 +454,3 @@ int chip8_machine_execute(struct chip8_machine *const m) {
     
     return EXEC_SUCCESS;
 }
-
-
