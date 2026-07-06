@@ -306,7 +306,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             break;
         
         case SUBN_V_V:
-            if (m->[m->current_instruction.y] >= m->v[m->current_instruction.x]) {
+            if (m->v[m->current_instruction.y] >= m->v[m->current_instruction.x]) {
                 m->v[FLAG_REGISTER_INDEX] = 1;
             } else {
                 m->v[FLAG_REGISTER_INDEX] = 0;
@@ -352,7 +352,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             exec_instr_display(m);
             break;
             
-        case SKP_V:
+        case SKP_V: {
             uint8_t key = m->v[m->current_instruction.x];
             if (key > 0xF) { // Replace magic number with macro?
                 return ERR_INVALID_KEYCODE;                
@@ -362,8 +362,9 @@ int chip8_machine_execute(struct chip8_machine *const m) {
                 m->pc += 2;
             }
             break;
+        }
         
-        case SKNP_V:
+        case SKNP_V: {
             uint8_t key = m->v[m->current_instruction.x];
             if (key > 0xF) {
                 return ERR_INVALID_KEYCODE;
@@ -373,7 +374,8 @@ int chip8_machine_execute(struct chip8_machine *const m) {
                 m->pc += 2;
             }
             break;
-        
+        }        
+
         case LD_V_DT:
             m->v[m->current_instruction.x] = m->delay_timer;
             break;
@@ -391,7 +393,6 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             if (m->v[m->current_instruction.x] > CHIP8_PROGRAM_FINAL - m->i) {
                 m->v[FLAG_REGISTER_INDEX] = 1;
             }
-            
             m->i += m->v[m->current_instruction.x];
             break;
         
@@ -402,7 +403,6 @@ int chip8_machine_execute(struct chip8_machine *const m) {
                     break;
                 }
             }
-            
             m->pc -= 2;
             break;
         
@@ -424,7 +424,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             m->v[m->i+2] = num % 10;
             break;
         
-        case LD_I_V:  
+        case LD_I_V: {
             uint8_t r = m->current_instruction.x;
             if (r > CHIP8_NUM_V_REGISTERS - 1 || m->i + r > CHIP8_PROGRAM_FINAL) {
                 return ERR_INVALID_MEMORY_ADDR;
@@ -433,10 +433,10 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             for (uint8_t i = 0; i <= r; ++i) {
                 m->memory[m->i + i] = m->v[i];
             }
-            
             break;
-        
-        case LD_V_I:
+        }
+
+        case LD_V_I: {
             uint8_t r = m->current_instruction.x;
             if (r > CHIP8_NUM_V_REGISTERS - 1 || m->i + r > CHIP8_PROGRAM_FINAL) {
                 return ERR_INVALID_MEMORY_ADDR;
@@ -445,8 +445,8 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             for (uint8_t i = 0; i <= r; ++i) {
                 m->v[i] = m->memory[m->i + i];
             }
-            
             break;
+        }
 
         default:
             return ERR_UNKNOWN_INSTR; 
