@@ -1,5 +1,6 @@
 #include "../include/chip8.h"
 
+#include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -106,6 +107,7 @@ void chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
                 default:
                     break;
             }
+            break;
         
         case 0x9:
             switch (m->current_instruction.n) {
@@ -115,6 +117,7 @@ void chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
                 default:
                     break; 
             }
+            break;
         
         case 0xA:
             m->current_instruction.type = LD_I_A;
@@ -178,8 +181,25 @@ void chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
     m->pc += 2; // Incr. pc to start of next instruction.
 }
 
-void chip8_machine_execute(struct chip8_machine *const m) { 
+int chip8_machine_execute(struct chip8_machine *const m) {  
+    switch(m->current_instruction.type) {
+        case SYS:
+            break; 
+        
+        case CLS:
+            for (size_t i = 0; i < CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDTH; ++i) {
+                m->display[i] = 0;
+            } 
+            break; 
+            
+        case JP_A:
+            m->pc = m->current_instruction.nnn;
+            break;
+        default:
+            return ERR_UNKNOWN_INSTR; 
+    }
     
+    return EXEC_SUCCESS;
 }
 
 

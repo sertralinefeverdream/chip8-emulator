@@ -1,5 +1,6 @@
 #ifndef CHIP8_H
 #define CHIP8_H
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -19,6 +20,10 @@
 #define CHIP8_FONTSET_START 0x050
 #define CHIP8_FONTSET_FINAL 0x09F
 #define CHIP8_FONTSET_MAX_SIZE ((CHIP8_FONTSET_FINAL) - (CHIP8_FONTSET_START) + 1) 
+
+// Execution return codes
+#define EXEC_SUCCESS 0 
+#define ERR_UNKNOWN_INSTR -1
 
 enum chip8_instruction_type {
     UNKNOWN, // Placeholder for unsuccessful decoding
@@ -83,7 +88,7 @@ struct chip8_machine {
 
 struct chip8_machine *chip8_machine_create(void);
 void chip8_machine_load_font(struct chip8_machine *const m, uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
-void chip8_machine_fetch_and_decode(struct chip8 *const m);
-void chip8_machine_execute(struct chip8 *const m);
+void chip8_machine_fetch_and_decode(struct chip8_machine *const m);
+int chip8_machine_execute(struct chip8_machine *const m);
 
 #endif
