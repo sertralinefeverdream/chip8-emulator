@@ -1,5 +1,6 @@
 #include "../include/chip8.h"
 
+#include <math.h>
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -210,8 +211,6 @@ static int exec_instr_display(struct chip8_machine *const m) {
     return EXEC_SUCCESS;
 } 
 
-
-
 int chip8_machine_execute(struct chip8_machine *const m) {  
     switch(m->current_instruction.type) {
         case SYS:
@@ -351,6 +350,102 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         
         case DRW_V_V_N:
             exec_instr_display(m);
+            break;
+            
+        case SKP_V:
+            uint8_t key = m->v[m->current_instruction.x];
+            if (key > 0xF) { // Replace magic number with macro?
+                return ERR_INVALID_KEYCODE;                
+            }
+            
+            if (m->keypad[key]) {
+                m->pc += 2;
+            }
+            break;
+        
+        case SKNP_V:
+            uint8_t key = m->v[m->current_instruction.x];
+            if (key > 0xF) {
+                return ERR_INVALID_KEYCODE;
+            }
+            
+            if (!m->keypad[key]) { 
+                m->pc += 2;
+            }
+            break;
+        
+        case LD_V_DT:
+            m->v[m->current_instruction.x] = m->delay_timer;
+            break;
+            
+        case LD_DT_V:
+            m->delay_timer = m->v[m->current_instruction.x];
+            break;
+        
+        case LD_ST_V:
+            m->sound_timer = m->v[m->current_instruction.x];
+            break;
+        
+        case ADD_I_V:
+            // Follows suggested Amiga interpreter behaviour
+            if (m->v[m->current_instruction.x] > CHIP8_PROGRAM_FINAL - m->i) {
+                m->v[FLAG_REGISTER_INDEX] = 1;
+            }
+            
+            m->i += m->v[m->current_instruction.x];
+            break;
+        
+        case LD_V_K:
+            for (size_t i = 0; i < KEYPAD_SIZE; ++i) { 
+                if (m->keypad[i]) { 
+                    m->v[m->current_instruction.x] = i;
+                    break;
+                }
+            }
+            
+            m->pc -= 2;
+            break;
+        
+        case LD_F_V:
+            if (m->v[m->current_instruction.x] > KEYPAD_SIZE - 1) { 
+                return ERR_INVALID_KEYCODE;
+            }
+            m->i = CHIP8_FONTSET_START + m->v[m->current_instruction.x];
+            break;
+        
+        case LD_B_V:
+            if (m->i + 2 > CHIP8_PROGRAM_FINAL) {
+                return ERR_INVALID_MEMORY_ADDR;
+            }
+            
+            uint8_t num = m->v[m->current_instruction.x];
+            m->v[m->i] = num / 100;     
+            m->v[m->i+1] = num / 10 % 10;
+            m->v[m->i+2] = num % 10;
+            break;
+        
+        case LD_I_V:  
+            uint8_t r = m->current_instruction.x;
+            if (r > CHIP8_NUM_V_REGISTERS - 1 || m->i + r > CHIP8_PROGRAM_FINAL) {
+                return ERR_INVALID_MEMORY_ADDR;
+            }
+
+            for (uint8_t i = 0; i <= r; ++i) {
+                m->memory[m->i + i] = m->v[i];
+            }
+            
+            break;
+        
+        case LD_V_I:
+            uint8_t r = m->current_instruction.x;
+            if (r > CHIP8_NUM_V_REGISTERS - 1 || m->i + r > CHIP8_PROGRAM_FINAL) {
+                return ERR_INVALID_MEMORY_ADDR;
+            }
+            
+            for (uint8_t i = 0; i <= r; ++i) {
+                m->v[i] = m->memory[m->i + i];
+            }
+            
             break;
 
         default:

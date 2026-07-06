@@ -11,6 +11,9 @@
 #define CHIP8_STACK_SIZE 2
 #define CHIP8_NUM_V_REGISTERS 16
 
+// Keypad
+#define KEYPAD_SIZE 16
+
 // Special Addresses
 #define CHIP8_PROGRAM_START 0x200
 #define CHIP8_PROGRAM_FINAL 0xFFF
@@ -27,6 +30,8 @@
 #define ERR_UNKNOWN_INSTR -1 // Instruction is unknown/cannot be decoded.
 #define ERR_STACK_OVERFLOW -2 // 
 #define ERR_STACK_UNDERFLOW -3
+#define ERR_INVALID_KEYCODE -4
+#define ERR_INVALID_MEMORY_ADDR -5
 
 // Display indexing
 #define DISPLAY_INDEX(x, y) ((y) * (CHIP8_DISPLAY_HEIGHT) + (x))
@@ -81,12 +86,13 @@ struct chip8_instruction {
 
 struct chip8_machine { 
     struct chip8_instruction current_instruction;
-    uint8_t memory[CHIP8_MEMORY_SIZE];
-    uint8_t display[CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDTH];
-    uint8_t v[CHIP8_NUM_V_REGISTERS];
     uint16_t pc; // Array index into memory. 
     uint16_t stack[CHIP8_STACK_SIZE]; 
     uint16_t i; // I (index register) used to point at locations in memory
+    uint8_t keypad[KEYPAD_SIZE];
+    uint8_t memory[CHIP8_MEMORY_SIZE];
+    uint8_t display[CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDTH];
+    uint8_t v[CHIP8_NUM_V_REGISTERS];
     uint8_t delay_timer; // 
     uint8_t sound_timer;
     int8_t stack_i; // Index points to top item in the stack. -1 for empty stack.
