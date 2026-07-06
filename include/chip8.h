@@ -20,10 +20,16 @@
 #define CHIP8_FONTSET_START 0x050
 #define CHIP8_FONTSET_FINAL 0x09F
 #define CHIP8_FONTSET_MAX_SIZE ((CHIP8_FONTSET_FINAL) - (CHIP8_FONTSET_START) + 1) 
+#define FLAG_REGISTER_INDEX 0xF
 
 // Execution return codes
-#define EXEC_SUCCESS 0 
-#define ERR_UNKNOWN_INSTR -1
+#define EXEC_SUCCESS 0 // Successful instruction execution
+#define ERR_UNKNOWN_INSTR -1 // Instruction is unknown/cannot be decoded.
+#define ERR_STACK_OVERFLOW -2 // 
+#define ERR_STACK_UNDERFLOW -3
+
+// Display indexing
+#define DISPLAY_INDEX(x, y) ((y) * (CHIP8_DISPLAY_HEIGHT) + (x))
 
 enum chip8_instruction_type {
     UNKNOWN, // Placeholder for unsuccessful decoding
@@ -65,7 +71,7 @@ enum chip8_instruction_type {
 };
 
 struct chip8_instruction {
-    enum chip8_instruction_type type; // First nibble omitted.
+    enum chip8_instruction_type type; 
     uint8_t x; // The second nibble of the instr
     uint8_t y; // Third nibble
     uint8_t n; // Fourth nibble
@@ -81,9 +87,9 @@ struct chip8_machine {
     uint16_t pc; // Array index into memory. 
     uint16_t stack[CHIP8_STACK_SIZE]; 
     uint16_t i; // I (index register) used to point at locations in memory
-    uint8_t stack_top; // Register used to point to top of stack
     uint8_t delay_timer; // 
     uint8_t sound_timer;
+    int8_t stack_i; // Index points to top item in the stack. -1 for empty stack.
 };
 
 struct chip8_machine *chip8_machine_create(void);
