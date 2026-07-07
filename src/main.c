@@ -89,6 +89,12 @@ int main(int argc, char **argv) {
     }
 
     chip8_machine_load_font(m, fontset);
+    printf("%d", chip8_machine_load_rom_file(m, "logo.ch8"));
+
+    if (chip8_machine_load_rom_file(m, "logo.ch8") != ROM_LOAD_SUCCESS) { 
+        printf("Error loading ROM");
+        return EXIT_FAILURE;
+    }
     
     // Add logic for loading program here
     
@@ -107,7 +113,6 @@ int main(int argc, char **argv) {
         
         if (now - last_instr_exec >= 1000 / INSTR_PER_SECOND) { 
             last_instr_exec = now;
-            printf("%d", chip8_machine_fetch_and_decode(m));
             if (chip8_machine_fetch_and_decode(m)) {
                 printf("Fetch and decode failure");
                 return EXIT_FAILURE; 
@@ -124,6 +129,9 @@ int main(int argc, char **argv) {
             chip8_machine_decrement_dt(m);
             chip8_machine_decrement_st(m);
         }
+        
+        // TBD : Screen Rendering
+        // TBD : Keyboard input handling
     }
 
 }

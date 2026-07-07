@@ -40,6 +40,30 @@ void chip8_machine_decrement_dt(struct chip8_machine *const m) {
     m->delay_timer--;
 }
 
+int chip8_machine_load_rom_file(struct chip8_machine *const m, const char *const file_path) {
+    FILE *rom = fopen(file_path, "r");
+    
+    if (!rom) {
+        return ERR_INVALID_ROM_FILEPATH; 
+    }
+
+    if (ftell(rom) + 1 > CHIP8_PROGRAM_MAX_SIZE) {
+        fclose(rom); 
+        return ERR_ROM_TOO_LARGE; 
+    }
+    rewind(rom);
+    
+    int8_t b; 
+    uint16_t index = CHIP8_PROGRAM_START;
+    while ((b = fgetc(rom)) != EOF) { 
+        m->memory[index] = b;
+        index++;
+    }
+    
+    fclose(rom);
+    return ROM_LOAD_SUCCESS;
+}
+
 int chip8_machine_fetch_and_decode(struct chip8_machine *const m) { 
     if (m->pc + 1 > CHIP8_PROGRAM_FINAL) {
         return ERR_FETCH_OUT_OF_BOUNDS;
@@ -65,7 +89,6 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
                     m->current_instruction.type = RET;
                     break;
                 default:
-                    printf("0000");
                     break; 
             }
             break;

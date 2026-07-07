@@ -16,7 +16,7 @@
 // Special Addresses
 #define CHIP8_PROGRAM_START 0x200
 #define CHIP8_PROGRAM_FINAL 0xFFF
-#define CHIP8_PROGRAM_MAX_SIZE ((CHIP8_PROGRAM_END) - (CHIP8_PROGRAM_START) + 1)
+#define CHIP8_PROGRAM_MAX_SIZE ((CHIP8_PROGRAM_FINAL) - (CHIP8_PROGRAM_START) + 1)
 #define CHIP8_RESERVED_START 0x000
 #define CHIP8_RESERVED_FINAL 0x1FF
 #define CHIP8_FONTSET_START 0x050
@@ -24,15 +24,18 @@
 #define CHIP8_FONTSET_MAX_SIZE ((CHIP8_FONTSET_FINAL) - (CHIP8_FONTSET_START) + 1) 
 #define FLAG_REGISTER_INDEX 0xF
 
-// Execution return codes
+// Return codes
 #define EXEC_SUCCESS 0 // Successful instruction execution 
 #define FETCH_DECODE_SUCCESS 0
+#define ROM_LOAD_SUCCESS 0
 #define ERR_UNKNOWN_INSTR -1 // Instruction is unknown/cannot be decoded.
 #define ERR_STACK_OVERFLOW -2 // 
 #define ERR_STACK_UNDERFLOW -3
 #define ERR_INVALID_KEYCODE -4
 #define ERR_INVALID_MEMORY_ADDR -5
 #define ERR_FETCH_OUT_OF_BOUNDS -6
+#define ERR_INVALID_ROM_FILEPATH -7
+#define ERR_ROM_TOO_LARGE -8
 
 // Display indexing
 #define DISPLAY_INDEX(x, y) ((y) * (CHIP8_DISPLAY_HEIGHT) + (x))
@@ -104,6 +107,7 @@ struct chip8_machine *chip8_machine_create(void);
 void chip8_machine_load_font(struct chip8_machine *const m, const uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
 void chip8_machine_decrement_dt(struct chip8_machine *const m);
 void chip8_machine_decrement_st(struct chip8_machine *const m);
+int chip8_machine_load_rom_file(struct chip8_machine *const m, const char *const file_path);
 int chip8_machine_fetch_and_decode(struct chip8_machine *const m);
 int chip8_machine_execute(struct chip8_machine *const m);
 void chip8_machine_reset_draw_flag(struct chip8_machine *const m);
