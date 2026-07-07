@@ -46,19 +46,26 @@ int chip8_machine_load_rom_file(struct chip8_machine *const m, const char *const
     if (!rom) {
         return ERR_INVALID_ROM_FILEPATH; 
     }
-
-    if (ftell(rom) + 1 > CHIP8_PROGRAM_MAX_SIZE) {
+    
+    fseek(rom, 0, SEEK_END);
+    long rom_size = ftell(rom) + 1;
+    if (rom_size > CHIP8_PROGRAM_MAX_SIZE) {
         fclose(rom); 
         return ERR_ROM_TOO_LARGE; 
     }
     rewind(rom);
-    
+  /* 
     int8_t b; 
     uint16_t index = CHIP8_PROGRAM_START;
     while ((b = fgetc(rom)) != EOF) { 
         m->memory[index] = b;
         index++;
     }
+   */ 
+    for (long i = 0; i < rom_size; i++) {
+        m->memory[CHIP8_PROGRAM_START + i] = (uint8_t) fgetc(rom);
+    }
+    
     
     fclose(rom);
     return ROM_LOAD_SUCCESS;
@@ -70,7 +77,7 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
     }
 
     uint16_t instr = ((uint16_t)(m->memory[m->pc])) << 8 | (uint16_t) m->memory[m->pc + 1]; // Combine 8-bit memory[pc] and memory[pc+1] into single 2 byte instr
-
+    printf("Instruction: %x\n", instr);
     uint8_t opcode = (uint8_t)((instr & 0xF000) >> 12);
     m->current_instruction.x = (uint8_t)((instr & 0x0F00) >> 8); 
     m->current_instruction.y = (uint8_t)((instr & 0x00F0) >> 4);
@@ -89,6 +96,7 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
                     m->current_instruction.type = RET;
                     break;
                 default:
+                    m->current_instruction.type = SYS;
                     break; 
             }
             break;
@@ -217,6 +225,37 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
                     m->current_instruction.type = LD_V_I;
                     break;
                 default:
+                    break;
+            }
+        
+        case 0xF:
+            switch (m->current_instruction.nn) { 
+                case 0x07:
+                    m->current_instruction.type = LD_V_DT;
+                    break;
+                case 0x0A:
+                    m->current_instruction.type = LD_V_K;
+                    break;
+                case 0x15: 
+                    m->current_instruction.type = LD_DT_V;
+                    break;
+                case 0x18:
+                    m->current_instruction.type = LD_ST_V;
+                    break;
+                case 0x1E:
+                    m->current_instruction.type = ADD_I_V;
+                    break;
+                case 0x29:
+                    m->current_instruction.type = LD_F_V;
+                    break;
+                case 0x33:
+                    m->current_instruction.type = LD_B_V;
+                    break;
+                case 0x55:
+                    m->current_instruction.type = LD_I_V;
+                    break;
+                case 0x65:
+                    m->current_instruction.type = LD_V_I;
                     break;
             }
         

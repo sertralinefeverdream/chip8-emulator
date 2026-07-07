@@ -7,8 +7,10 @@
 
 // Definitions
 #define WINDOW_TITLE "Adrian's Chip8 Emulator"
-#define ROM_PATH "logo.ch8"
-#define SCALE 30
+#define WINDOW_WIDTH 1200 
+#define WINDOW_HEIGHT 800 
+#define SCALE 10
+#define ROM_PATH "ibm.ch8"
 
 // Error codes
 #define ERR_SDL_INIT -1
@@ -44,7 +46,8 @@ struct sdl_platform {
     SDL_Renderer *renderer;
 };
 
-/*int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) { 
+/*
+int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) { 
     SDL_RenderClear(platform->renderer);
     SDL_SetRenderDrawColor(platform->renderer, 255, 255, 255, 255);
     for (size_t x = 0; x < CHIP8_DISPLAY_WIDTH; x++) { 
@@ -82,6 +85,7 @@ int draw_display(const struct sdl_platform *const platform, const struct chip8_m
    return 0;
 }
 
+
 int sdl_platform_init(struct sdl_platform *platform) {
     if (SDL_Init(SDL_INIT_EVERYTHING)) { 
         fprintf(stderr, "Error while initialising SDL.\n");
@@ -92,8 +96,8 @@ int sdl_platform_init(struct sdl_platform *platform) {
         WINDOW_TITLE, 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
-        CHIP8_DISPLAY_WIDTH * SCALE, 
-        CHIP8_DISPLAY_HEIGHT * SCALE,
+        WINDOW_WIDTH, 
+        WINDOW_HEIGHT, 
         0
     );
     
@@ -113,6 +117,7 @@ int sdl_platform_init(struct sdl_platform *platform) {
         return ERR_RENDERER_INIT;
     }
     
+    //SDL_RenderSetScale(platform->renderer, WINDOW_WIDTH / (float)CHIP8_DISPLAY_WIDTH, WINDOW_HEIGHT / (float)CHIP8_DISPLAY_HEIGHT);
     return 0;
 } 
 
@@ -167,13 +172,14 @@ int main(int argc, char **argv) {
         
         if (now - last_instr_exec >= 1000 / INSTR_PER_SECOND) { 
             last_instr_exec = now;
-            if (chip8_machine_fetch_and_decode(m)) {
-                //printf("Fetch and decode failure");
+            int fetch_return = chip8_machine_fetch_and_decode(m);
+            if (fetch_return) {
+                printf("Fetch and decode failure: %d", fetch_return);
                 return EXIT_FAILURE; 
             }
             
             if (chip8_machine_execute(m)) {
-               //printf("Execute failure");
+               printf("Execute failure");
                return EXIT_FAILURE;
             }
         }
