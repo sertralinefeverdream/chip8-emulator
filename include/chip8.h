@@ -1,7 +1,6 @@
 #ifndef CHIP8_H
 #define CHIP8_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
 // Chip 8 Machine Specs
@@ -26,12 +25,14 @@
 #define FLAG_REGISTER_INDEX 0xF
 
 // Execution return codes
-#define EXEC_SUCCESS 0 // Successful instruction execution
+#define EXEC_SUCCESS 0 // Successful instruction execution 
+#define FETCH_DECODE_SUCCESS 0
 #define ERR_UNKNOWN_INSTR -1 // Instruction is unknown/cannot be decoded.
 #define ERR_STACK_OVERFLOW -2 // 
 #define ERR_STACK_UNDERFLOW -3
 #define ERR_INVALID_KEYCODE -4
 #define ERR_INVALID_MEMORY_ADDR -5
+#define ERR_FETCH_OUT_OF_BOUNDS -6
 
 // Display indexing
 #define DISPLAY_INDEX(x, y) ((y) * (CHIP8_DISPLAY_HEIGHT) + (x))
@@ -95,12 +96,16 @@ struct chip8_machine {
     uint8_t v[CHIP8_NUM_V_REGISTERS];
     uint8_t delay_timer; // 
     uint8_t sound_timer;
+    uint8_t draw_flag;
     int8_t stack_i; // Index points to top item in the stack. -1 for empty stack.
 };
 
 struct chip8_machine *chip8_machine_create(void);
-void chip8_machine_load_font(struct chip8_machine *const m, uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
-void chip8_machine_fetch_and_decode(struct chip8_machine *const m);
+void chip8_machine_load_font(struct chip8_machine *const m, const uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
+void chip8_machine_decrement_dt(struct chip8_machine *const m);
+void chip8_machine_decrement_st(struct chip8_machine *const m);
+int chip8_machine_fetch_and_decode(struct chip8_machine *const m);
 int chip8_machine_execute(struct chip8_machine *const m);
+void chip8_machine_reset_draw_flag(struct chip8_machine *const m);
 
 #endif

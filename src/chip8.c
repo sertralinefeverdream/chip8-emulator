@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 struct chip8_machine *chip8_machine_create(void) {
     struct chip8_machine *m = malloc(sizeof(struct chip8_machine));
@@ -17,13 +18,33 @@ struct chip8_machine *chip8_machine_create(void) {
     return m;
 }
 
-void chip8_machine_load_font(struct chip8_machine *const m, uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]) { 
+void chip8_machine_load_font(struct chip8_machine *const m, const uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]) { 
     for (size_t i = 0; i < CHIP8_FONTSET_MAX_SIZE; ++i) { 
         m->memory[CHIP8_FONTSET_START + i] = fontset[i];
     }
 }
 
-void chip8_machine_fetch_and_decode(struct chip8_machine *const m) { 
+void chip8_machine_decrement_st(struct chip8_machine *const m) { 
+    if (m->sound_timer == 0) {
+        return;
+    }
+    
+    m->sound_timer--;
+}
+
+void chip8_machine_decrement_dt(struct chip8_machine *const m) { 
+    if (m->delay_timer == 0) {
+       return; 
+    }
+    
+    m->delay_timer--;
+}
+
+int chip8_machine_fetch_and_decode(struct chip8_machine *const m) { 
+    if (m->pc + 1 > CHIP8_PROGRAM_FINAL) {
+        return ERR_FETCH_OUT_OF_BOUNDS;
+    }
+
     uint16_t instr = ((uint16_t)(m->memory[m->pc])) << 8 | (uint16_t) m->memory[m->pc + 1]; // Combine 8-bit memory[pc] and memory[pc+1] into single 2 byte instr
 
     uint8_t opcode = (uint8_t)((instr & 0xF000) >> 12);
@@ -44,6 +65,7 @@ void chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
                     m->current_instruction.type = RET;
                     break;
                 default:
+                    printf("0000");
                     break; 
             }
             break;
@@ -178,8 +200,13 @@ void chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
         default:
             break;
     }
-
+    
+    if (m->current_instruction.type == UNKNOWN) { 
+        return ERR_UNKNOWN_INSTR;
+    }
+    
     m->pc += 2; // Incr. pc to start of next instruction.
+    return FETCH_DECODE_SUCCESS;
 }
 
 static int exec_instr_display(struct chip8_machine *const m) {
@@ -207,7 +234,8 @@ static int exec_instr_display(struct chip8_machine *const m) {
             m->display[DISPLAY_INDEX(x+k, y+k)] = display_pixel ^ sprite_pixel;
         }
     }
-    
+   
+    m->draw_flag = 1;
     return EXEC_SUCCESS;
 } 
 
