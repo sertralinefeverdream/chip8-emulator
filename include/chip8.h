@@ -38,7 +38,7 @@
 #define ERR_ROM_TOO_LARGE -8
 
 // Display indexing
-#define DISPLAY_INDEX(x, y) ((y) * (CHIP8_DISPLAY_HEIGHT) + (x))
+#define DISPLAY_INDEX(x, y) ((y) * (CHIP8_DISPLAY_WIDTH) + (x))
 
 enum chip8_instruction_type {
     UNKNOWN, // Placeholder for unsuccessful decoding

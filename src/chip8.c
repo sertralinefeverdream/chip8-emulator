@@ -242,19 +242,21 @@ static int exec_instr_display(struct chip8_machine *const m) {
             continue;
         }
 
-        uint8_t sprite = m->v[m->i + j];
+        uint8_t sprite = m->memory[m->i + j];
         for (size_t k = 0; k < 8; ++k) {            
             if (x + k > CHIP8_DISPLAY_WIDTH - 1) {
                 continue;
             }
             
-            uint8_t display_pixel = m->display[DISPLAY_INDEX(x+k, y+k)];
+            uint8_t display_pixel = m->display[DISPLAY_INDEX(x+k, y+j)];
             uint8_t sprite_pixel = (sprite >> (7-k)) & 0x1; 
+            printf("Sprite pixel: %d Sprite: %d\n", sprite_pixel, sprite);
             if (display_pixel && sprite_pixel) {
                 m->v[FLAG_REGISTER_INDEX] = 1;
             }
-        
-            m->display[DISPLAY_INDEX(x+k, y+k)] = display_pixel ^ sprite_pixel;
+            
+            // printf("%zu %zu (*%zu %zu)\n", x+k, y+j, x, y);
+            m->display[DISPLAY_INDEX(x+k, y+j)] = display_pixel ^ sprite_pixel;
         }
     }
    
@@ -271,10 +273,11 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             for (size_t i = 0; i < CHIP8_DISPLAY_HEIGHT * CHIP8_DISPLAY_WIDTH; ++i) {
                 m->display[i] = 0;
             } 
+            m->draw_flag = 1;
             break; 
         
         case RET:
-            if (m->stack_i + 1 <= -1) {
+            if (m->stack_i - 1 < -1) {
                 return ERR_STACK_UNDERFLOW;
             }
             
@@ -470,9 +473,9 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             }
             
             uint8_t num = m->v[m->current_instruction.x];
-            m->v[m->i] = num / 100;     
-            m->v[m->i+1] = num / 10 % 10;
-            m->v[m->i+2] = num % 10;
+            m->memory[m->i] = num / 100;     
+            m->memory[m->i+1] = num / 10 % 10;
+            m->memory[m->i+2] = num % 10;
             break;
         
         case LD_I_V: {

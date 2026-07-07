@@ -7,6 +7,8 @@
 
 // Definitions
 #define WINDOW_TITLE "Adrian's Chip8 Emulator"
+#define ROM_PATH "logo.ch8"
+#define SCALE 30
 
 // Error codes
 #define ERR_SDL_INIT -1
@@ -42,6 +44,44 @@ struct sdl_platform {
     SDL_Renderer *renderer;
 };
 
+/*int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) { 
+    SDL_RenderClear(platform->renderer);
+    SDL_SetRenderDrawColor(platform->renderer, 255, 255, 255, 255);
+    for (size_t x = 0; x < CHIP8_DISPLAY_WIDTH; x++) { 
+        for (size_t y = 0; y < CHIP8_DISPLAY_HEIGHT; y++)  {
+            // printf("Colour at %zu %zu %d\n", x, y, m->display[DISPLAY_INDEX(x,y)]);
+            if (m->display[DISPLAY_INDEX(x,y)]) { 
+                SDL_RenderDrawPoint(platform->renderer, x, y);
+            }
+        }
+    }
+    SDL_RenderPresent(platform->renderer);
+    SDL_SetRenderDrawColor(platform->renderer, 0, 0, 0, 255);
+    printf("DRAWING DONE\n");
+    return 0;
+}
+*/
+
+int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) {
+   SDL_RenderClear(platform->renderer);
+   SDL_SetRenderDrawColor(platform->renderer, 255, 255, 255, 255);
+   for (size_t x = 0; x < CHIP8_DISPLAY_WIDTH; x++) {
+       for (size_t y = 0; y < CHIP8_DISPLAY_HEIGHT; y++) { 
+           if (m->display[DISPLAY_INDEX(x,y)]) {
+               SDL_Rect p;  
+               p.x = x * SCALE;
+               p.y = y * SCALE;
+               p.w = SCALE;
+               p.h = SCALE;
+               SDL_RenderFillRect(platform->renderer, &p);
+           }
+       }
+   }
+   SDL_RenderPresent(platform->renderer);
+   SDL_SetRenderDrawColor(platform->renderer, 0, 0, 0, 255);
+   return 0;
+}
+
 int sdl_platform_init(struct sdl_platform *platform) {
     if (SDL_Init(SDL_INIT_EVERYTHING)) { 
         fprintf(stderr, "Error while initialising SDL.\n");
@@ -52,8 +92,8 @@ int sdl_platform_init(struct sdl_platform *platform) {
         WINDOW_TITLE, 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
-        CHIP8_DISPLAY_WIDTH, 
-        CHIP8_DISPLAY_HEIGHT,
+        CHIP8_DISPLAY_WIDTH * SCALE, 
+        CHIP8_DISPLAY_HEIGHT * SCALE,
         0
     );
     
@@ -72,7 +112,7 @@ int sdl_platform_init(struct sdl_platform *platform) {
         fprintf(stderr, "Error while creating SDL renderer.\n");
         return ERR_RENDERER_INIT;
     }
-
+    
     return 0;
 } 
 
@@ -89,37 +129,51 @@ int main(int argc, char **argv) {
     }
 
     chip8_machine_load_font(m, fontset);
-    printf("%d", chip8_machine_load_rom_file(m, "logo.ch8"));
 
-    if (chip8_machine_load_rom_file(m, "logo.ch8") != ROM_LOAD_SUCCESS) { 
+    if (chip8_machine_load_rom_file(m, ROM_PATH) != ROM_LOAD_SUCCESS) { 
         printf("Error loading ROM");
         return EXIT_FAILURE;
     }
     
     // Add logic for loading program here
-    
-    uint32_t last_frame_update;
-    uint32_t last_timer_update;
-    uint32_t last_instr_exec;
+    uint32_t last_frame_update = 0;
+    uint32_t last_timer_update = 0;
+    uint32_t last_instr_exec = 0;
+    SDL_RenderPresent(platform.renderer);
     for (;;) {  
-        printf("Tick");
+        SDL_Delay(1);
         uint32_t now = SDL_GetTicks();
+        //printf("\t %d \t %d \t %d", last_frame_update, last_timer_update, last_instr_exec);
+        
+        SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
+               case SDL_QUIT: 
+                   return EXIT_SUCCESS;
+                   break;
+            
+                default:
+                    break;
+            }
+        }
         
         // Update display
         if (now - last_frame_update >= 1000 / FRAMES_PER_SECOND && m->draw_flag) { 
             last_frame_update = now;
+            printf("Drawing now");
+            draw_display(&platform, m);
             m->draw_flag = 0;
         }
         
         if (now - last_instr_exec >= 1000 / INSTR_PER_SECOND) { 
             last_instr_exec = now;
             if (chip8_machine_fetch_and_decode(m)) {
-                printf("Fetch and decode failure");
+                //printf("Fetch and decode failure");
                 return EXIT_FAILURE; 
             }
             
             if (chip8_machine_execute(m)) {
-               printf("Execute failure");
+               //printf("Execute failure");
                return EXIT_FAILURE;
             }
         }
@@ -129,8 +183,6 @@ int main(int argc, char **argv) {
             chip8_machine_decrement_dt(m);
             chip8_machine_decrement_st(m);
         }
-        
-        // TBD : Screen Rendering
         // TBD : Keyboard input handling
     }
 
