@@ -1,6 +1,7 @@
 #include "../include/chip8.h"
 
 #include <SDL2/SDL.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -10,7 +11,7 @@
 #define WINDOW_WIDTH 1200 
 #define WINDOW_HEIGHT 800 
 #define SCALE 20
-#define ROM_PATH "PONG"
+#define ROM_PATH "Breakout.ch8"
 
 // Error codes
 #define ERR_SDL_INIT -1
@@ -41,10 +42,28 @@ const uint8_t fontset[CHIP8_FONTSET_MAX_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
+struct sound_data { 
+    double long time;
+    double frequency;
+    int amplitude;
+};
+
 struct sdl_platform { 
     SDL_Window *window;
     SDL_Renderer *renderer;
+    SDL_AudioDeviceID audio_id;
+    struct sound_data sd;
 };
+
+void beep_samples_generator(void *sd_p, uint8_t *stream, int len) {     
+    struct sound_data *sd = (struct sound_data*) sd_p;
+    sd->time = 0;
+    for (size_t i = 0; i < len; ++i) { 
+        stream[i] = sd->amplitude * sin(sd->frequency * 2 * 3.1415 * sd->time);
+        //printf("%d\n", stream[i]);
+        sd->time += 1.0/44100;
+    }
+}
 
 int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) {
    SDL_RenderClear(platform->renderer);
@@ -97,7 +116,21 @@ int sdl_platform_init(struct sdl_platform *platform) {
         return ERR_RENDERER_INIT;
     }
     
-    //SDL_RenderSetScale(platform->renderer, WINDOW_WIDTH / (float)CHIP8_DISPLAY_WIDTH, WINDOW_HEIGHT / (float)CHIP8_DISPLAY_HEIGHT);
+
+    platform->sd.frequency = 432;   
+    platform->sd.time = 0;
+    platform->sd.amplitude = 10;
+
+    SDL_AudioSpec desired_as = {0};
+    desired_as.freq = 44100;
+    desired_as.format = AUDIO_S8;
+    desired_as.channels = 1;   
+    desired_as.samples = 1024;    
+    desired_as.callback = beep_samples_generator;
+    desired_as.userdata = &platform->sd;
+    
+    SDL_AudioSpec obtained_as;
+    platform->audio_id = SDL_OpenAudioDevice(NULL, 0, &desired_as, &obtained_as, 0);
     return 0;
 } 
 
@@ -167,8 +200,9 @@ int main(int argc, char **argv) {
                 return EXIT_FAILURE; 
             }
             
-            if (chip8_machine_execute(m)) {
-               printf("Execute failure");
+            int decode_return = chip8_machine_execute(m);
+            if (decode_return) {
+               printf("Execute failure: %d", decode_return);
                return EXIT_FAILURE;
             }
             
@@ -184,7 +218,13 @@ int main(int argc, char **argv) {
             last_frame_update = now;
             draw_display(&platform, m);
             m->draw_flag = 0;
-        }}
-
-
+        }
+        
+        if (m->sound_timer == 0) {
+            SDL_PauseAudioDevice(platform.audio_id, 1);            
+        } else {
+            SDL_PauseAudioDevice(platform.audio_id, 0);
+        }
+    }
+    
 }
