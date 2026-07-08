@@ -90,7 +90,7 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
     }
 
     uint16_t instr = ((uint16_t)(m->memory[m->pc])) << 8 | (uint16_t) m->memory[m->pc + 1]; // Combine 8-bit memory[pc] and memory[pc+1] into single 2 byte instr
-    //printf("Instruction: %x\n", instr);
+    printf("Instruction: %x\n", instr);
     uint8_t opcode = (uint8_t)((instr & 0xF000) >> 12);
     m->current_instruction.x = (uint8_t)((instr & 0x0F00) >> 8); 
     m->current_instruction.y = (uint8_t)((instr & 0x00F0) >> 4);
@@ -503,13 +503,18 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             break;
         
         case LD_V_K:
-            for (size_t i = 0; i < KEYPAD_SIZE; ++i) { 
+            int key_found = 0;
+            for (uint8_t i = 0; i < KEYPAD_SIZE; ++i) { 
                 if (m->keypad[i]) { 
+                    printf("Pressed");
                     m->v[m->current_instruction.x] = i;
+                    key_found = 1;
                     break;
                 }
             }
-            m->pc -= 2;
+            if (!key_found) {
+                m->pc -= 2;
+            }
             break;
         
         case LD_F_V:

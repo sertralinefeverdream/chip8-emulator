@@ -11,7 +11,7 @@
 #define WINDOW_WIDTH 1600 
 #define WINDOW_HEIGHT 800 
 #define SCALE 25 
-#define ROM_PATH "Breakout.ch8"
+#define ROM_PATH "LL.ch8"
 
 // Error codes
 #define ERR_SDL_INIT -1
@@ -152,6 +152,18 @@ int main(int argc, char **argv) {
     uint32_t last_instr_exec = 0;
     for (;;) {  
         const uint8_t *key_states = SDL_GetKeyboardState(NULL);
+                SDL_Event e;
+        while (SDL_PollEvent(&e)) {
+            switch (e.type) {
+                case SDL_QUIT: 
+                    return EXIT_SUCCESS;
+                    break;
+                
+                default:
+                    break;
+            }
+        }
+        
         chip8_machine_register_key(m, 0x1, key_states[SDL_SCANCODE_1]);
         chip8_machine_register_key(m, 0x2, key_states[SDL_SCANCODE_2]);
         chip8_machine_register_key(m, 0x3, key_states[SDL_SCANCODE_3]);
@@ -163,26 +175,14 @@ int main(int argc, char **argv) {
         chip8_machine_register_key(m, 0xD, key_states[SDL_SCANCODE_R]);
 
         chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_S]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_D]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_F]);
+        chip8_machine_register_key(m, 0x8, key_states[SDL_SCANCODE_S]);
+        chip8_machine_register_key(m, 0x9, key_states[SDL_SCANCODE_D]);
+        chip8_machine_register_key(m, 0xE, key_states[SDL_SCANCODE_F]);
 
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_Z]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_X]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_C]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_V]);
-        
-        SDL_Event e;
-        while (SDL_PollEvent(&e)) {
-            switch (e.type) {
-                case SDL_QUIT: 
-                    return EXIT_SUCCESS;
-                    break;
-                
-                default:
-                    break;
-            }
-        }
+        chip8_machine_register_key(m, 0xA, key_states[SDL_SCANCODE_Z]);
+        chip8_machine_register_key(m, 0x0, key_states[SDL_SCANCODE_X]);
+        chip8_machine_register_key(m, 0xB, key_states[SDL_SCANCODE_C]);
+        chip8_machine_register_key(m, 0xF, key_states[SDL_SCANCODE_V]);
         
         uint32_t now = SDL_GetTicks();
         if (now - last_instr_exec >= 1000 / INSTR_PER_SECOND) { 
