@@ -42,26 +42,20 @@ const uint8_t fontset[CHIP8_FONTSET_MAX_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-struct sound_data { 
-    double long time;
-    double frequency;
-    int amplitude;
-};
-
 struct sdl_platform { 
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_AudioDeviceID audio_id;
-    struct sound_data sd;
+    double frequency;
+    int amplitude;
 };
 
 void beep_samples_generator(void *sd_p, uint8_t *stream, int len) {     
-    struct sound_data *sd = (struct sound_data*) sd_p;
-    sd->time = 0;
+    struct sdl_platform = (struct sdl_platform*) sd_p;
+    double time = 0;
     for (size_t i = 0; i < len; ++i) { 
         stream[i] = sd->amplitude * sin(sd->frequency * 2 * 3.1415 * sd->time);
-        //printf("%d\n", stream[i]);
-        sd->time += 1.0/44100;
+        time += 1.0/44100;
     }
 }
 
@@ -117,9 +111,8 @@ int sdl_platform_init(struct sdl_platform *platform) {
     }
     
 
-    platform->sd.frequency = 432;   
-    platform->sd.time = 0;
-    platform->sd.amplitude = 10;
+    platform->frequency = 432;   
+    platform->amplitude = 10;
 
     SDL_AudioSpec desired_as = {0};
     desired_as.freq = 44100;
@@ -127,7 +120,7 @@ int sdl_platform_init(struct sdl_platform *platform) {
     desired_as.channels = 1;   
     desired_as.samples = 1024;    
     desired_as.callback = beep_samples_generator;
-    desired_as.userdata = &platform->sd;
+    desired_as.userdata = platform;
     
     SDL_AudioSpec obtained_as;
     platform->audio_id = SDL_OpenAudioDevice(NULL, 0, &desired_as, &obtained_as, 0);
