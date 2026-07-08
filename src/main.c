@@ -8,9 +8,9 @@
 
 // Definitions
 #define WINDOW_TITLE "Adrian's Chip8 Emulator"
-#define WINDOW_WIDTH 1200 
+#define WINDOW_WIDTH 1600 
 #define WINDOW_HEIGHT 800 
-#define SCALE 20
+#define SCALE 25 
 #define ROM_PATH "Breakout.ch8"
 
 // Error codes
@@ -50,11 +50,11 @@ struct sdl_platform {
     int amplitude;
 };
 
-void beep_samples_generator(void *sd_p, uint8_t *stream, int len) {     
-    struct sdl_platform = (struct sdl_platform*) sd_p;
+void beep_samples_generator(void *pp, uint8_t *stream, int len) {     
+    struct sdl_platform *p = (struct sdl_platform*) pp;
     double time = 0;
     for (size_t i = 0; i < len; ++i) { 
-        stream[i] = sd->amplitude * sin(sd->frequency * 2 * 3.1415 * sd->time);
+        stream[i] = p->amplitude * sin(p->frequency * 2 * 3.1415 * time);
         time += 1.0/44100;
     }
 }
