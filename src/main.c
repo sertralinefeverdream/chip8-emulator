@@ -9,7 +9,7 @@
 #define WINDOW_TITLE "Adrian's Chip8 Emulator"
 #define WINDOW_WIDTH 1200 
 #define WINDOW_HEIGHT 800 
-#define SCALE 10
+#define SCALE 20
 #define ROM_PATH "PONG"
 
 // Error codes
@@ -66,7 +66,6 @@ int draw_display(const struct sdl_platform *const platform, const struct chip8_m
    return 0;
 }
 
-
 int sdl_platform_init(struct sdl_platform *platform) {
     if (SDL_Init(SDL_INIT_EVERYTHING)) { 
         fprintf(stderr, "Error while initialising SDL.\n");
@@ -121,14 +120,11 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
     
-    // Add logic for loading program here
+    SDL_RenderPresent(platform.renderer);
     uint32_t last_frame_update = 0;
     uint32_t last_timer_update = 0;
     uint32_t last_instr_exec = 0;
-    SDL_RenderPresent(platform.renderer);
     for (;;) {  
-        uint32_t now = SDL_GetTicks();
-        
         const uint8_t *key_states = SDL_GetKeyboardState(NULL);
         chip8_machine_register_key(m, 0x1, key_states[SDL_SCANCODE_1]);
         chip8_machine_register_key(m, 0x2, key_states[SDL_SCANCODE_2]);
@@ -141,15 +137,14 @@ int main(int argc, char **argv) {
         chip8_machine_register_key(m, 0xD, key_states[SDL_SCANCODE_R]);
 
         chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_S]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_D]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_F]);
 
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_Z]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_X]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_C]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_V]);
         
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
@@ -163,6 +158,7 @@ int main(int argc, char **argv) {
             }
         }
         
+        uint32_t now = SDL_GetTicks();
         if (now - last_instr_exec >= 1000 / INSTR_PER_SECOND) { 
             last_instr_exec = now;
             int fetch_return = chip8_machine_fetch_and_decode(m);
