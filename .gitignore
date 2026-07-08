@@ -1,6 +1,9 @@
 # Prerequisites
 *.d
 
+# chip8
+*.ch8
+
 # Object files
 *.o
 *.ko

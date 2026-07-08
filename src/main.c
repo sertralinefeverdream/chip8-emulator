@@ -11,7 +11,7 @@
 #define WINDOW_WIDTH 1600 
 #define WINDOW_HEIGHT 800 
 #define SCALE 25 
-#define ROM_PATH "LL.ch8"
+#define ROM_PATH "4-flags.ch8"
 
 // Error codes
 #define ERR_SDL_INIT -1
