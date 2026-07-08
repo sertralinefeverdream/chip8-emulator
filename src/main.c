@@ -46,25 +46,6 @@ struct sdl_platform {
     SDL_Renderer *renderer;
 };
 
-/*
-int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) { 
-    SDL_RenderClear(platform->renderer);
-    SDL_SetRenderDrawColor(platform->renderer, 255, 255, 255, 255);
-    for (size_t x = 0; x < CHIP8_DISPLAY_WIDTH; x++) { 
-        for (size_t y = 0; y < CHIP8_DISPLAY_HEIGHT; y++)  {
-            // printf("Colour at %zu %zu %d\n", x, y, m->display[DISPLAY_INDEX(x,y)]);
-            if (m->display[DISPLAY_INDEX(x,y)]) { 
-                SDL_RenderDrawPoint(platform->renderer, x, y);
-            }
-        }
-    }
-    SDL_RenderPresent(platform->renderer);
-    SDL_SetRenderDrawColor(platform->renderer, 0, 0, 0, 255);
-    printf("DRAWING DONE\n");
-    return 0;
-}
-*/
-
 int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) {
    SDL_RenderClear(platform->renderer);
    SDL_SetRenderDrawColor(platform->renderer, 255, 255, 255, 255);
