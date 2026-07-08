@@ -24,6 +24,19 @@ void chip8_machine_load_font(struct chip8_machine *const m, const uint8_t fontse
     }
 }
 
+void chip8_machine_register_key(struct chip8_machine *const m, uint8_t key, uint8_t down) {
+    if (key > KEYPAD_SIZE - 1) {
+        return;
+    }
+    m->keypad[key] = down;
+}
+
+void chip8_machine_clear_keys(struct chip8_machine *const m) {
+    for (size_t i = 0; i < KEYPAD_SIZE; ++i) { 
+        m->keypad[i] = 0;
+    }
+}
+
 void chip8_machine_decrement_st(struct chip8_machine *const m) { 
     if (m->sound_timer == 0) {
         return;
@@ -77,7 +90,7 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
     }
 
     uint16_t instr = ((uint16_t)(m->memory[m->pc])) << 8 | (uint16_t) m->memory[m->pc + 1]; // Combine 8-bit memory[pc] and memory[pc+1] into single 2 byte instr
-    printf("Instruction: %x\n", instr);
+    //printf("Instruction: %x\n", instr);
     uint8_t opcode = (uint8_t)((instr & 0xF000) >> 12);
     m->current_instruction.x = (uint8_t)((instr & 0x0F00) >> 8); 
     m->current_instruction.y = (uint8_t)((instr & 0x00F0) >> 4);
@@ -289,7 +302,7 @@ static int exec_instr_display(struct chip8_machine *const m) {
             
             uint8_t display_pixel = m->display[DISPLAY_INDEX(x+k, y+j)];
             uint8_t sprite_pixel = (sprite >> (7-k)) & 0x1; 
-            printf("Sprite pixel: %d Sprite: %d\n", sprite_pixel, sprite);
+            // printf("Sprite pixel: %d Sprite: %d\n", sprite_pixel, sprite);
             if (display_pixel && sprite_pixel) {
                 m->v[FLAG_REGISTER_INDEX] = 1;
             }
@@ -503,7 +516,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             if (m->v[m->current_instruction.x] > KEYPAD_SIZE - 1) { 
                 return ERR_INVALID_KEYCODE;
             }
-            m->i = CHIP8_FONTSET_START + m->v[m->current_instruction.x];
+            m->i = CHIP8_FONTSET_START + (m->v[m->current_instruction.x] * 5);
             break;
         
         case LD_B_V:

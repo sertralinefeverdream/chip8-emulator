@@ -10,7 +10,7 @@
 #define WINDOW_WIDTH 1200 
 #define WINDOW_HEIGHT 800 
 #define SCALE 10
-#define ROM_PATH "ibm.ch8"
+#define ROM_PATH "PONG"
 
 // Error codes
 #define ERR_SDL_INIT -1
@@ -146,28 +146,40 @@ int main(int argc, char **argv) {
     uint32_t last_instr_exec = 0;
     SDL_RenderPresent(platform.renderer);
     for (;;) {  
-        SDL_Delay(1);
         uint32_t now = SDL_GetTicks();
-        //printf("\t %d \t %d \t %d", last_frame_update, last_timer_update, last_instr_exec);
+        
+        const uint8_t *key_states = SDL_GetKeyboardState(NULL);
+        chip8_machine_register_key(m, 0x1, key_states[SDL_SCANCODE_1]);
+        chip8_machine_register_key(m, 0x2, key_states[SDL_SCANCODE_2]);
+        chip8_machine_register_key(m, 0x3, key_states[SDL_SCANCODE_3]);
+        chip8_machine_register_key(m, 0xC, key_states[SDL_SCANCODE_4]);
+
+        chip8_machine_register_key(m, 0x4, key_states[SDL_SCANCODE_Q]);
+        chip8_machine_register_key(m, 0x5, key_states[SDL_SCANCODE_W] );
+        chip8_machine_register_key(m, 0x6, key_states[SDL_SCANCODE_E]);
+        chip8_machine_register_key(m, 0xD, key_states[SDL_SCANCODE_R]);
+
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+
         
         SDL_Event e;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
-               case SDL_QUIT: 
-                   return EXIT_SUCCESS;
-                   break;
-            
+                case SDL_QUIT: 
+                    return EXIT_SUCCESS;
+                    break;
+                
                 default:
                     break;
             }
-        }
-        
-        // Update display
-        if (now - last_frame_update >= 1000 / FRAMES_PER_SECOND && m->draw_flag) { 
-            last_frame_update = now;
-            printf("Drawing now");
-            draw_display(&platform, m);
-            m->draw_flag = 0;
         }
         
         if (now - last_instr_exec >= 1000 / INSTR_PER_SECOND) { 
@@ -182,6 +194,7 @@ int main(int argc, char **argv) {
                printf("Execute failure");
                return EXIT_FAILURE;
             }
+            
         }
         
         if (now - last_timer_update >= 1000 / TIMER_DECREASE_RATE) {
@@ -189,7 +202,12 @@ int main(int argc, char **argv) {
             chip8_machine_decrement_dt(m);
             chip8_machine_decrement_st(m);
         }
-        // TBD : Keyboard input handling
-    }
+
+        if (now - last_frame_update >= 1000 / FRAMES_PER_SECOND && m->draw_flag) { 
+            last_frame_update = now;
+            draw_display(&platform, m);
+            m->draw_flag = 0;
+        }}
+
 
 }

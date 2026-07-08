@@ -111,5 +111,7 @@ int chip8_machine_load_rom_file(struct chip8_machine *const m, const char *const
 int chip8_machine_fetch_and_decode(struct chip8_machine *const m);
 int chip8_machine_execute(struct chip8_machine *const m);
 void chip8_machine_reset_draw_flag(struct chip8_machine *const m);
+void chip8_machine_register_key(struct chip8_machine *const m, uint8_t key, uint8_t down);
+
 
 #endif
