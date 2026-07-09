@@ -7,6 +7,7 @@
 
 // Definitions
 #define WINDOW_TITLE "Adrian's Chip8 Emulator"
+#define BEEP_AMPLITUDE 10
 
 // Return Codes
 #define ERR_SDL_INIT -1

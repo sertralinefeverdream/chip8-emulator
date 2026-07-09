@@ -51,7 +51,43 @@ void update_keypad(const uint8_t *key_states, struct chip8_machine *const m) {
  
 int main(int argc, char **argv) { 
     struct emulator_config config;
-    if (emulator_config_initialise_from_args(&config, argc, argv)) {
+    int config_ret = emulator_config_initialise_from_args(&config, argc, argv);
+    if (config_ret) {
+        char *msg;
+        switch (config_ret) {      
+            case ERR_MISSING_ARGUMENT:
+                msg = "Missing an argument. First argument must be ROM file path.\n";
+                break;
+            
+            case ERR_INVALID_WINDOW_WIDTH:
+                msg = "Invalid window width supplied.\n";
+                break;
+            
+            case ERR_INVALID_WINDOW_HEIGHT:
+                msg = "Invalid window height supplied.\n";
+                break;
+            
+            case ERR_INVALID_FPS:
+                msg = "Invalid fps value supplied.\n";
+                break;
+                
+            case ERR_INVALID_IPS:
+                msg = "Invalid instr per second value supplied.\n";
+                break;
+            
+            case ERR_INVALID_TDR: 
+                msg = "Invalid timer decrease rate supplied.\n";
+                break;
+            
+            case ERR_UNKNOWN_FLAG:
+                msg = "Invalid or unknown flag or arg supplied.\n";
+                break;
+                
+            default:
+                msg = "Miscellaneous Error: %d\n";
+                break;
+        }
+        fprintf(stderr, msg, config_ret);
         return EXIT_FAILURE;
     }
 
@@ -70,7 +106,7 @@ int main(int argc, char **argv) {
     chip8_machine_load_font(m, fontset);
 
     if (chip8_machine_load_rom_file(m, config.rom_path) != ROM_LOAD_SUCCESS) { 
-        printf("Error loading ROM\n");
+        printf("Error loading ROM. File path may be invalid.\n"); 
         return EXIT_FAILURE;
     }
     

@@ -9,7 +9,7 @@ void sine_wave_sample(void *config_v, uint8_t *stream, int len) {
     const struct emulator_config *config = (struct emulator_config*) config_v;
     double time = 0;
     for (size_t i = 0; i < (size_t)len; ++i) { 
-        stream[i] = config->beep_amplitude * sin(config->beep_frequency * 2 * time);
+        stream[i] = BEEP_AMPLITUDE * sin(config->beep_frequency * 2 * time);
         time += 1.0/44100;
     }
 }

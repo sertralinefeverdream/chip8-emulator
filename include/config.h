@@ -5,7 +5,6 @@
 
 // Default config options
 #define DEFAULT_BEEP_FREQUENCY 864
-#define DEFAULT_BEEP_AMPLITUDE 10
 
 #define DEFAULT_INSTR_PER_SECOND 700
 #define DEFAULT_FRAMES_PER_SECOND 60 
@@ -22,6 +21,20 @@
 // Return Codes
 #define CONFIG_INIT_SUCCESS 0
 #define ERR_CONFIG_NULL_PTR -1
+#define ERR_MISSING_ARGUMENT -2
+#define ERR_INVALID_WINDOW_WIDTH -3
+#define ERR_INVALID_WINDOW_HEIGHT -4
+#define ERR_INVALID_FPS -5
+#define ERR_INVALID_IPS -6
+#define ERR_INVALID_TDR -7
+#define ERR_UNKNOWN_FLAG -8
+
+// Command Line Flags
+#define FLAG_WINDOW_WIDTH "-w"
+#define FLAG_WINDOW_HEIGHT "-h"
+#define FLAG_FPS "--fps"
+#define FLAG_IPS "--ips"
+#define FLAG_TIMER_DECREASE_RATE "-t"
 
 struct emulator_config {
     double beep_frequency;
@@ -30,7 +43,6 @@ struct emulator_config {
     double timer_decrease_rate;
     unsigned window_width;
     unsigned window_height;
-    uint8_t beep_amplitude;
     const char *rom_path;
 };
 
