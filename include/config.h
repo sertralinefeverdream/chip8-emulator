@@ -36,6 +36,12 @@
 #define FLAG_IPS "--ips"
 #define FLAG_TIMER_DECREASE_RATE "-t"
 
+// Command Line Quirk Flags
+#define FLAG_Q_ARITH_INSTR_OVERFLOW_RESET "--q-arith-instr-overflow-reset"
+#define FLAG_Q_SHIFT_ONLY_VX "--q-shift-only-vx"
+#define FLAG_Q_ADD_TO_INDEX_OVERFLOW "--q-add-to_index_overflow"
+#define FLAG_Q_STORE_LOAD_INCREMENT_INDEX "--q-store-load-increment-index"
+
 struct emulator_config {
     double beep_frequency;
     double instr_per_second;
@@ -44,6 +50,10 @@ struct emulator_config {
     unsigned window_width;
     unsigned window_height;
     const char *rom_path;
+    uint8_t q_arith_instr_overflow_reset; 
+    uint8_t q_shift_only_vx;
+    uint8_t q_store_load_increment_index;
+    uint8_t q_add_to_index_overflow;
 };
 
 int emulator_config_initialise_default(struct emulator_config *const ec); 

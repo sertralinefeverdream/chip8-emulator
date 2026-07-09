@@ -112,6 +112,14 @@ int emulator_config_initialise_from_args(struct emulator_config *const ec, int a
             
             ec->timer_decrease_rate = tdr_double;
             ++i;
+        } else if (!strcmp(argv[i], FLAG_Q_ARITH_INSTR_OVERFLOW_RESET)) {
+            ec->q_arith_instr_overflow_reset = 1;
+        } else if (!strcmp(argv[i], FLAG_Q_SHIFT_ONLY_VX)) {
+            ec->q_shift_only_vx = 1;
+        } else if (!strcmp(argv[i], FLAG_Q_ADD_TO_INDEX_OVERFLOW)) {
+            ec->q_add_to_index_overflow = 1;            
+        } else if (!strcmp(argv[i], FLAG_Q_STORE_LOAD_INCREMENT_INDEX)) {
+            ec->q_store_load_increment_index = 1;
         } else {
             return ERR_UNKNOWN_FLAG; 
         } 
