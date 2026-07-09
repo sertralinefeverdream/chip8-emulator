@@ -382,47 +382,57 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             m->v[m->current_instruction.x] ^= m->v[m->current_instruction.y];
             break;
         
-        case ADD_V_V:
+        case ADD_V_V: {
+            uint8_t overflow = 0;
             if (m->v[m->current_instruction.y] > UINT8_MAX - m->v[m->current_instruction.x]) {
-                m->v[FLAG_REGISTER_INDEX] = 1; // Signifies that the operation has overflowed.
+                overflow = 1;
             }
             
             m->v[m->current_instruction.x] += m->v[m->current_instruction.y];
+            m->v[FLAG_REGISTER_INDEX] = overflow;
             break;
+        }
         
-        case SUB_V_V:
+        case SUB_V_V: {
+            uint8_t overflow = 0;
             if (m->v[m->current_instruction.x] >= m->v[m->current_instruction.y]) {
-                m->v[FLAG_REGISTER_INDEX] = 1;
-            } else {
-                m->v[FLAG_REGISTER_INDEX] = 0;
+                overflow = 1;
             }
-            
+
             m->v[m->current_instruction.x] -= m->v[m->current_instruction.y];
+            m->v[FLAG_REGISTER_INDEX] = overflow;
             break;
+        }
         
-        case SUBN_V_V:
+        case SUBN_V_V: {
+            uint8_t overflow = 0;
             if (m->v[m->current_instruction.y] >= m->v[m->current_instruction.x]) {
-                m->v[FLAG_REGISTER_INDEX] = 1;
-            } else {
-                m->v[FLAG_REGISTER_INDEX] = 0;
-            }
+                overflow = 1;
+            } 
             
+               
             m->v[m->current_instruction.x] = m->v[m->current_instruction.y] - m->v[m->current_instruction.x];
+            m->v[FLAG_REGISTER_INDEX] = overflow;
             break;
+        }
         
-        case SHR_V_V:
+        case SHR_V_V: {
             // Ambiguous instruction. First step is not in chip-48 or later
             m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
-            m->v[FLAG_REGISTER_INDEX] = m->v[m->current_instruction.x] & 0x1; // Getting LSB 
+            uint8_t shifted_bit = m->v[m->current_instruction.x] & 0x1;
             m->v[m->current_instruction.x] >>= 1;
+            m->v[FLAG_REGISTER_INDEX] = shifted_bit;
             break;
+        }
         
-        case SHL_V_V:
+        case SHL_V_V:  {
             // Ambiguous instruction. Ditto
             m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
-            m->v[FLAG_REGISTER_INDEX] = m->v[m->current_instruction.x] >> 7; // Getting MSB
+            uint8_t shifted_bit = m->v[m->current_instruction.x] >> 7;
             m->v[m->current_instruction.x] <<= 1;
+            m->v[FLAG_REGISTER_INDEX] = shifted_bit;
             break;
+        }
         
         case SNE_V_V:
             if (m->v[m->current_instruction.x] != m->v[m->current_instruction.y]) {
