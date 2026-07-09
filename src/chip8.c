@@ -368,14 +368,23 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         
         case LD_V_V:
             m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
+            if (m->quirks.q_arith_instr_overflow_reset) { 
+                m->v[FLAG_REGISTER_INDEX] = 0;
+            }
             break;
         
         case OR_V_V:
             m->v[m->current_instruction.x] |= m->v[m->current_instruction.y];
+            if (m->quirks.q_arith_instr_overflow_reset) {
+               m->v[FLAG_REGISTER_INDEX] = 0;
+            }
             break;
         
         case AND_V_V:
             m->v[m->current_instruction.x] &= m->v[m->current_instruction.y];
+            if (m->quirks.q_arith_instr_overflow_reset) {
+                m->v[FLAG_REGISTER_INDEX] = 0;
+            }
             break;
         
         case XOR_V_V:
@@ -418,7 +427,9 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         
         case SHR_V_V: {
             // Ambiguous instruction. First step is not in chip-48 or later
-            m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
+            if (!m->quirks.q_shift_only_vx) {
+                m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
+            }
             uint8_t shifted_bit = m->v[m->current_instruction.x] & 0x1;
             m->v[m->current_instruction.x] >>= 1;
             m->v[FLAG_REGISTER_INDEX] = shifted_bit;
@@ -495,10 +506,10 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         
         case ADD_I_V:
             // Follows suggested Amiga interpreter behaviour
-            if (m->v[m->current_instruction.x] > CHIP8_PROGRAM_FINAL - m->i) {
+            m->i += m->v[m->current_instruction.x];
+            if (m->quirks.q_add_to_index_overflow || m->v[m->current_instruction.x] > CHIP8_PROGRAM_FINAL - m->i) {
                 m->v[FLAG_REGISTER_INDEX] = 1;
             }
-            m->i += m->v[m->current_instruction.x];
             break;
         
         case LD_V_K:
@@ -543,6 +554,11 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             for (uint8_t i = 0; i <= r; ++i) {
                 m->memory[m->i + i] = m->v[i];
             }
+            
+            if (m->quirks.q_store_load_increment_index) { 
+                m->i += r + 1;
+            }
+
             break;
         }
 
@@ -554,6 +570,10 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             
             for (uint8_t i = 0; i <= r; ++i) {
                 m->v[i] = m->memory[m->i + i];
+            }
+            
+            if (m->quirks.q_store_load_increment_index) { 
+                m->i += r + 1;
             }
             break;
         }

@@ -88,8 +88,16 @@ struct chip8_instruction {
     uint16_t nnn; // The second, third and fourth nibbles. (12-bit memory addr)
 };
 
+struct chip8_quirks {
+    uint8_t q_arith_instr_overflow_reset; // COSMAC behaviour where VF value set to 0 on all most arithmetic operations where it is not set otherwise. 
+    uint8_t q_shift_only_vx; //  
+    uint8_t q_add_to_index_overflow;
+    uint8_t q_store_load_increment_index;
+}
+
 struct chip8_machine { 
-    struct chip8_instruction current_instruction;
+    struct chip8_instruction current_instruction; 
+    struct chip8_quirks quirks;
     uint16_t pc; // Array index into memory. 
     uint16_t stack[CHIP8_STACK_SIZE]; 
     uint16_t i; // I (index register) used to point at locations in memory
