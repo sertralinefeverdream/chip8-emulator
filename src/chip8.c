@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-struct chip8_machine *chip8_machine_create(void) {
+struct chip8_machine *chip8_machine_create(const struct chip8_quirks q) {
     struct chip8_machine *m = malloc(sizeof(struct chip8_machine));
     if (!m) {
         return m;
@@ -14,6 +14,7 @@ struct chip8_machine *chip8_machine_create(void) {
 
     memset(m, 0, sizeof(*m)); 
     m->pc = CHIP8_PROGRAM_START; // Initialise program counter to starting program addr
+    m->quirks = q;
     return m;
 }
 
@@ -389,6 +390,9 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         
         case XOR_V_V:
             m->v[m->current_instruction.x] ^= m->v[m->current_instruction.y];
+            if (m->quirks.q_arith_instr_overflow_reset) {
+               m->v[FLAG_REGISTER_INDEX] = 0;
+            }
             break;
         
         case ADD_V_V: {
@@ -438,7 +442,9 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         
         case SHL_V_V:  {
             // Ambiguous instruction. Ditto
-            m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
+            if (!m->quirks.q_shift_only_vx) {
+                m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
+            }
             uint8_t shifted_bit = m->v[m->current_instruction.x] >> 7;
             m->v[m->current_instruction.x] <<= 1;
             m->v[FLAG_REGISTER_INDEX] = shifted_bit;

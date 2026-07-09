@@ -11,7 +11,8 @@ int emulator_config_initialise_default(struct emulator_config *const ec) {
         printf("NULL");
         return ERR_CONFIG_NULL_PTR;
     }
-    
+   
+    memset(ec, 0, sizeof(*ec));
     ec->beep_frequency = DEFAULT_BEEP_FREQUENCY;
     ec->instr_per_second = DEFAULT_INSTR_PER_SECOND;
     ec->frames_per_second = DEFAULT_FRAMES_PER_SECOND;

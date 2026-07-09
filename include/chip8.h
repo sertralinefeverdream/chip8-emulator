@@ -93,7 +93,7 @@ struct chip8_quirks {
     uint8_t q_shift_only_vx; //  
     uint8_t q_add_to_index_overflow;
     uint8_t q_store_load_increment_index;
-}
+};
 
 struct chip8_machine { 
     struct chip8_instruction current_instruction; 
@@ -111,7 +111,7 @@ struct chip8_machine {
     int8_t stack_i; // Index points to top item in the stack. -1 for empty stack.
 };
 
-struct chip8_machine *chip8_machine_create(void);
+struct chip8_machine *chip8_machine_create(const struct chip8_quirks q);
 void chip8_machine_load_font(struct chip8_machine *const m, const uint8_t fontset[static CHIP8_FONTSET_MAX_SIZE]);
 void chip8_machine_decrement_dt(struct chip8_machine *const m);
 void chip8_machine_decrement_st(struct chip8_machine *const m);

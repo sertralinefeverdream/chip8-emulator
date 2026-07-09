@@ -96,12 +96,20 @@ int main(int argc, char **argv) {
         fprintf(stderr, "Error while initialising SDL platform.\n");
         return EXIT_FAILURE;
     };
+    
+    struct chip8_quirks q = {0};
+    q.q_add_to_index_overflow = config.q_add_to_index_overflow; 
+    q.q_arith_instr_overflow_reset = config.q_arith_instr_overflow_reset;
+    q.q_shift_only_vx = config.q_shift_only_vx;
+    q.q_store_load_increment_index = config.q_store_load_increment_index;
 
-    struct chip8_machine *m = chip8_machine_create();
+    struct chip8_machine *m = chip8_machine_create(q);
     if (!m) {
         fprintf(stderr, "Error while trying to create chip8_machine.\n");
         return EXIT_FAILURE;
     }
+    
+    //printf("%d \t %d \n", m->quirks.q_store_load_increment_index, q.q_store_load_increment_index);
 
     chip8_machine_load_font(m, fontset);
 
@@ -145,7 +153,6 @@ int main(int argc, char **argv) {
                printf("Execute failure: %d", decode_return);
                return EXIT_FAILURE;
             }
-            
         }
         
         if (now - last_timer_update >= 1000 / config.timer_decrease_rate) {
