@@ -46,15 +46,21 @@ struct sdl_platform {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_AudioDeviceID audio_id;
-    double frequency;
-    int amplitude;
 };
 
-void beep_samples_generator(void *pp, uint8_t *stream, int len) {     
-    struct sdl_platform *p = (struct sdl_platform*) pp;
+struct emulator_config {
+    double beep_frequency;
+    int window_width;
+    int window_height;
+    int beep_amplitude;
+    char *const rom_path;
+};
+
+void beep_samples_generator(void *config_v, uint8_t *stream, int len) {     
+    struct emulator_config *config = (struct emulator_config*) config_v;
     double time = 0;
     for (size_t i = 0; i < len; ++i) { 
-        stream[i] = p->amplitude * sin(p->frequency * 2 * 3.1415 * time);
+        stream[i] = config->beep_amplitude * sin(config->beep_frequency * 2 * 3.1415 * time);
         time += 1.0/44100;
     }
 }
@@ -65,12 +71,7 @@ int draw_display(const struct sdl_platform *const platform, const struct chip8_m
    for (size_t x = 0; x < CHIP8_DISPLAY_WIDTH; x++) {
        for (size_t y = 0; y < CHIP8_DISPLAY_HEIGHT; y++) { 
            if (m->display[DISPLAY_INDEX(x,y)]) {
-               SDL_Rect p;  
-               p.x = x * SCALE;
-               p.y = y * SCALE;
-               p.w = SCALE;
-               p.h = SCALE;
-               SDL_RenderFillRect(platform->renderer, &p);
+               SDL_RenderDrawPoint(platform->renderer, x, y);
            }
        }
    }
@@ -79,7 +80,7 @@ int draw_display(const struct sdl_platform *const platform, const struct chip8_m
    return 0;
 }
 
-int sdl_platform_init(struct sdl_platform *platform) {
+int sdl_platform_init(struct sdl_platform *const platform, const struct emulator_config *const config) {
     if (SDL_Init(SDL_INIT_EVERYTHING)) { 
         fprintf(stderr, "Error while initialising SDL.\n");
         return ERR_SDL_INIT;
@@ -89,8 +90,8 @@ int sdl_platform_init(struct sdl_platform *platform) {
         WINDOW_TITLE, 
         SDL_WINDOWPOS_CENTERED, 
         SDL_WINDOWPOS_CENTERED, 
-        WINDOW_WIDTH, 
-        WINDOW_HEIGHT, 
+        config->window_width, 
+        config->window_height, 
         0
     );
     
@@ -110,9 +111,7 @@ int sdl_platform_init(struct sdl_platform *platform) {
         return ERR_RENDERER_INIT;
     }
     
-
-    platform->frequency = 432;   
-    platform->amplitude = 10;
+    SDL_RenderSetScale(platform->renderer, config->window_width / (float)CHIP8_DISPLAY_WIDTH, config->window_height / (float)CHIP8_DISPLAY_HEIGHT);
 
     SDL_AudioSpec desired_as = {0};
     desired_as.freq = 44100;
@@ -120,7 +119,7 @@ int sdl_platform_init(struct sdl_platform *platform) {
     desired_as.channels = 1;   
     desired_as.samples = 1024;    
     desired_as.callback = beep_samples_generator;
-    desired_as.userdata = platform;
+    desired_as.userdata = config;
     
     SDL_AudioSpec obtained_as;
     platform->audio_id = SDL_OpenAudioDevice(NULL, 0, &desired_as, &obtained_as, 0);
@@ -128,8 +127,9 @@ int sdl_platform_init(struct sdl_platform *platform) {
 } 
 
 int main(int argc, char **argv) { 
+    struct emulator_config config;
     struct sdl_platform platform;
-    if (sdl_platform_init(&platform)) { 
+    if (sdl_platform_init(&platform, &config)) { 
         return EXIT_FAILURE;
     };
 
