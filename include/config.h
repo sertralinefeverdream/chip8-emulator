@@ -1,8 +1,10 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <stdint.h>
+
 // Default config options
-#define DEFAULT_BEEP_FREQUENCY 432
+#define DEFAULT_BEEP_FREQUENCY 864
 #define DEFAULT_BEEP_AMPLITUDE 10
 
 #define DEFAULT_INSTR_PER_SECOND 700
@@ -28,13 +30,11 @@ struct emulator_config {
     double timer_decrease_rate;
     unsigned window_width;
     unsigned window_height;
-    unsigned beep_amplitude;
+    uint8_t beep_amplitude;
     const char *rom_path;
 };
 
 int emulator_config_initialise_default(struct emulator_config *const ec); 
 int emulator_config_initialise_from_args(struct emulator_config *const ec, int argc, char **argv);
-
-
 
 #endif

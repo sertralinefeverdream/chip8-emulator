@@ -1,24 +1,12 @@
 #include "../include/chip8.h"
 #include "../include/config.h"
+#include "../include/platform.h"
 
 #include <SDL2/SDL.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
-
-// Definitions
-#define WINDOW_TITLE "Adrian's Chip8 Emulator"
-
-// Error codes
-#define ERR_SDL_INIT -1
-#define ERR_WINDOW_INIT -2
-#define ERR_RENDERER_INIT -3
-
-// Config (To be moved into struct later, hardcoded for now)
-#define INSTR_PER_SECOND 700.0
-#define FRAMES_PER_SECOND 60.0
-#define TIMER_DECREASE_RATE 60.0 
 
 const uint8_t fontset[CHIP8_FONTSET_MAX_SIZE] = { 
     0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
@@ -39,113 +27,61 @@ const uint8_t fontset[CHIP8_FONTSET_MAX_SIZE] = {
     0xF0, 0x80, 0xF0, 0x80, 0x80  // F
 };
 
-struct sdl_platform { 
-    SDL_Window *window;
-    SDL_Renderer *renderer;
-    SDL_AudioDeviceID audio_id;
-};
+void update_keypad(const uint8_t *key_states, struct chip8_machine *const m) {
+    chip8_machine_register_key(m, 0x1, key_states[SDL_SCANCODE_1]);
+    chip8_machine_register_key(m, 0x2, key_states[SDL_SCANCODE_2]);
+    chip8_machine_register_key(m, 0x3, key_states[SDL_SCANCODE_3]);
+    chip8_machine_register_key(m, 0xC, key_states[SDL_SCANCODE_4]);
 
-void beep_samples_generator(void *config_v, uint8_t *stream, int len) {     
-    struct emulator_config *config = (struct emulator_config*) config_v;
-    double time = 0;
-    for (size_t i = 0; i < len; ++i) { 
-        stream[i] = config->beep_amplitude * sin(config->beep_frequency * 2 * 3.1415 * time);
-        time += 1.0/44100;
-    }
+    chip8_machine_register_key(m, 0x4, key_states[SDL_SCANCODE_Q]);
+    chip8_machine_register_key(m, 0x5, key_states[SDL_SCANCODE_W] );
+    chip8_machine_register_key(m, 0x6, key_states[SDL_SCANCODE_E]);
+    chip8_machine_register_key(m, 0xD, key_states[SDL_SCANCODE_R]);
+
+    chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
+    chip8_machine_register_key(m, 0x8, key_states[SDL_SCANCODE_S]);
+    chip8_machine_register_key(m, 0x9, key_states[SDL_SCANCODE_D]);
+    chip8_machine_register_key(m, 0xE, key_states[SDL_SCANCODE_F]);
+
+    chip8_machine_register_key(m, 0xA, key_states[SDL_SCANCODE_Z]);
+    chip8_machine_register_key(m, 0x0, key_states[SDL_SCANCODE_X]);
+    chip8_machine_register_key(m, 0xB, key_states[SDL_SCANCODE_C]);
+    chip8_machine_register_key(m, 0xF, key_states[SDL_SCANCODE_V]);
 }
-
-int draw_display(const struct sdl_platform *const platform, const struct chip8_machine *const m) {
-   SDL_RenderClear(platform->renderer);
-   SDL_SetRenderDrawColor(platform->renderer, 255, 255, 255, 255);
-   for (size_t x = 0; x < CHIP8_DISPLAY_WIDTH; x++) {
-       for (size_t y = 0; y < CHIP8_DISPLAY_HEIGHT; y++) { 
-           if (m->display[DISPLAY_INDEX(x,y)]) {
-               SDL_RenderDrawPoint(platform->renderer, x, y);
-           }
-       }
-   }
-   SDL_RenderPresent(platform->renderer);
-   SDL_SetRenderDrawColor(platform->renderer, 0, 0, 0, 255);
-   return 0;
-}
-
-int sdl_platform_init(struct sdl_platform *const platform, const struct emulator_config *const config) {
-    if (SDL_Init(SDL_INIT_EVERYTHING)) { 
-        fprintf(stderr, "Error while initialising SDL.\n");
-        return ERR_SDL_INIT;
-    }
-    
-    platform->window = SDL_CreateWindow(
-        WINDOW_TITLE, 
-        SDL_WINDOWPOS_CENTERED, 
-        SDL_WINDOWPOS_CENTERED, 
-        config->window_width, 
-        config->window_height, 
-        0
-    );
-    
-    if (!platform->window) {
-        fprintf(stderr, "Error while creating SDL window.\n");
-        return ERR_WINDOW_INIT;
-    }
-    
-    platform->renderer = SDL_CreateRenderer(
-        platform->window,
-        -1,
-        0
-    );
-    
-    if (!platform->renderer) { 
-        fprintf(stderr, "Error while creating SDL renderer.\n");
-        return ERR_RENDERER_INIT;
-    }
-    
-    SDL_RenderSetScale(platform->renderer, config->window_width / (float)CHIP8_DISPLAY_WIDTH, config->window_height / (float)CHIP8_DISPLAY_HEIGHT);
-
-    SDL_AudioSpec desired_as = {0};
-    desired_as.freq = 44100;
-    desired_as.format = AUDIO_S8;
-    desired_as.channels = 1;   
-    desired_as.samples = 1024;    
-    desired_as.callback = beep_samples_generator;
-    desired_as.userdata = config;
-    
-    SDL_AudioSpec obtained_as;
-    platform->audio_id = SDL_OpenAudioDevice(NULL, 0, &desired_as, &obtained_as, 0);
-    return 0;
-} 
-
+ 
 int main(int argc, char **argv) { 
     struct emulator_config config;
-    struct sdl_platform platform;
-    if (!emulator_config_initialise_from_args(&config, argc, argv)) {
+    if (emulator_config_initialise_from_args(&config, argc, argv)) {
         return EXIT_FAILURE;
     }
 
+    struct sdl_platform platform;
     if (sdl_platform_init(&platform, &config)) { 
+        fprintf(stderr, "Error while initialising SDL platform.\n");
         return EXIT_FAILURE;
     };
 
     struct chip8_machine *m = chip8_machine_create();
     if (!m) {
-        fprintf(stderr, "Error while trying to create chip8_machine");
+        fprintf(stderr, "Error while trying to create chip8_machine.\n");
         return EXIT_FAILURE;
     }
 
     chip8_machine_load_font(m, fontset);
 
-    if (chip8_machine_load_rom_file(m, ROM_PATH) != ROM_LOAD_SUCCESS) { 
-        printf("Error loading ROM");
+    if (chip8_machine_load_rom_file(m, config.rom_path) != ROM_LOAD_SUCCESS) { 
+        printf("Error loading ROM\n");
         return EXIT_FAILURE;
     }
     
-    SDL_RenderPresent(platform.renderer);
+    const uint8_t *key_states = SDL_GetKeyboardState(NULL);
     uint32_t last_frame_update = 0;
     uint32_t last_timer_update = 0;
     uint32_t last_instr_exec = 0;
+    SDL_RenderPresent(platform.renderer);
+
     for (;;) {  
-        const uint8_t *key_states = SDL_GetKeyboardState(NULL);
-                SDL_Event e;
+        SDL_Event e;
         while (SDL_PollEvent(&e)) {
             switch (e.type) {
                 case SDL_QUIT: 
@@ -156,29 +92,11 @@ int main(int argc, char **argv) {
                     break;
             }
         }
-        
-        chip8_machine_register_key(m, 0x1, key_states[SDL_SCANCODE_1]);
-        chip8_machine_register_key(m, 0x2, key_states[SDL_SCANCODE_2]);
-        chip8_machine_register_key(m, 0x3, key_states[SDL_SCANCODE_3]);
-        chip8_machine_register_key(m, 0xC, key_states[SDL_SCANCODE_4]);
-
-        chip8_machine_register_key(m, 0x4, key_states[SDL_SCANCODE_Q]);
-        chip8_machine_register_key(m, 0x5, key_states[SDL_SCANCODE_W] );
-        chip8_machine_register_key(m, 0x6, key_states[SDL_SCANCODE_E]);
-        chip8_machine_register_key(m, 0xD, key_states[SDL_SCANCODE_R]);
-
-        chip8_machine_register_key(m, 0x7, key_states[SDL_SCANCODE_A]);
-        chip8_machine_register_key(m, 0x8, key_states[SDL_SCANCODE_S]);
-        chip8_machine_register_key(m, 0x9, key_states[SDL_SCANCODE_D]);
-        chip8_machine_register_key(m, 0xE, key_states[SDL_SCANCODE_F]);
-
-        chip8_machine_register_key(m, 0xA, key_states[SDL_SCANCODE_Z]);
-        chip8_machine_register_key(m, 0x0, key_states[SDL_SCANCODE_X]);
-        chip8_machine_register_key(m, 0xB, key_states[SDL_SCANCODE_C]);
-        chip8_machine_register_key(m, 0xF, key_states[SDL_SCANCODE_V]);
+       
+        update_keypad(key_states, m);
         
         uint32_t now = SDL_GetTicks();
-        if (now - last_instr_exec >= 1000 / INSTR_PER_SECOND) { 
+        if (now - last_instr_exec >= 1000 / config.instr_per_second) { 
             last_instr_exec = now;
             int fetch_return = chip8_machine_fetch_and_decode(m);
             if (fetch_return) {
@@ -194,22 +112,22 @@ int main(int argc, char **argv) {
             
         }
         
-        if (now - last_timer_update >= 1000 / TIMER_DECREASE_RATE) {
+        if (now - last_timer_update >= 1000 / config.timer_decrease_rate) {
             last_timer_update = now;            
             chip8_machine_decrement_dt(m);
             chip8_machine_decrement_st(m);
         }
 
-        if (now - last_frame_update >= 1000 / FRAMES_PER_SECOND && m->draw_flag) { 
+        if (now - last_frame_update >= 1000 / config.frames_per_second && m->draw_flag) { 
             last_frame_update = now;
             draw_display(&platform, m);
             m->draw_flag = 0;
         }
         
-        if (m->sound_timer == 0) {
-            SDL_PauseAudioDevice(platform.audio_id, 1);            
+        if (m->sound_timer) {
+            play_beep(&platform);
         } else {
-            SDL_PauseAudioDevice(platform.audio_id, 0);
+            stop_beep(&platform);
         }
     }
     

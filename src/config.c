@@ -1,9 +1,11 @@
 #include "../include/config.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
 int emulator_config_initialise_default(struct emulator_config *const ec) { 
     if (ec == NULL) {
+        printf("NULL");
         return ERR_CONFIG_NULL_PTR;
     }
     
@@ -14,7 +16,7 @@ int emulator_config_initialise_default(struct emulator_config *const ec) {
     ec->window_width = DEFAULT_WINDOW_WIDTH;
     ec->window_height = DEFAULT_WINDOW_HEIGHT;
     ec->beep_amplitude = DEFAULT_BEEP_AMPLITUDE;
-    ec->rom_path = NULL;
+    ec->rom_path = "INVADERS.ch8";
     return CONFIG_INIT_SUCCESS;
 }
 

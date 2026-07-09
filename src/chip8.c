@@ -8,7 +8,6 @@
 
 struct chip8_machine *chip8_machine_create(void) {
     struct chip8_machine *m = malloc(sizeof(struct chip8_machine));
-
     if (!m) {
         return m;
     }
@@ -41,7 +40,6 @@ void chip8_machine_decrement_st(struct chip8_machine *const m) {
     if (m->sound_timer == 0) {
         return;
     }
-    
     m->sound_timer--;
 }
 
@@ -49,13 +47,11 @@ void chip8_machine_decrement_dt(struct chip8_machine *const m) {
     if (m->delay_timer == 0) {
        return; 
     }
-    
     m->delay_timer--;
 }
 
 int chip8_machine_load_rom_file(struct chip8_machine *const m, const char *const file_path) {
     FILE *rom = fopen(file_path, "r");
-    
     if (!rom) {
         return ERR_INVALID_ROM_FILEPATH; 
     }
@@ -67,18 +63,10 @@ int chip8_machine_load_rom_file(struct chip8_machine *const m, const char *const
         return ERR_ROM_TOO_LARGE; 
     }
     rewind(rom);
-  /* 
-    int8_t b; 
-    uint16_t index = CHIP8_PROGRAM_START;
-    while ((b = fgetc(rom)) != EOF) { 
-        m->memory[index] = b;
-        index++;
-    }
-   */ 
+
     for (long i = 0; i < rom_size; i++) {
         m->memory[CHIP8_PROGRAM_START + i] = (uint8_t) fgetc(rom);
     }
-    
     
     fclose(rom);
     return ROM_LOAD_SUCCESS;
@@ -90,7 +78,7 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
     }
 
     uint16_t instr = ((uint16_t)(m->memory[m->pc])) << 8 | (uint16_t) m->memory[m->pc + 1]; // Combine 8-bit memory[pc] and memory[pc+1] into single 2 byte instr
-    printf("Instruction: %x\n", instr);
+    //printf("Instruction: %x\n", instr);
     uint8_t opcode = (uint8_t)((instr & 0xF000) >> 12);
     m->current_instruction.x = (uint8_t)((instr & 0x0F00) >> 8); 
     m->current_instruction.y = (uint8_t)((instr & 0x00F0) >> 4);
@@ -240,6 +228,7 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
                 default:
                     break;
             }
+            break;
         
         case 0xF:
             switch (m->current_instruction.nn) { 
