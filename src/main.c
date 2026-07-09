@@ -1,4 +1,5 @@
 #include "../include/chip8.h"
+#include "../include/config.h"
 
 #include <SDL2/SDL.h>
 #include <math.h>
@@ -8,10 +9,6 @@
 
 // Definitions
 #define WINDOW_TITLE "Adrian's Chip8 Emulator"
-#define WINDOW_WIDTH 1600 
-#define WINDOW_HEIGHT 800 
-#define SCALE 25 
-#define ROM_PATH "4-flags.ch8"
 
 // Error codes
 #define ERR_SDL_INIT -1
@@ -46,14 +43,6 @@ struct sdl_platform {
     SDL_Window *window;
     SDL_Renderer *renderer;
     SDL_AudioDeviceID audio_id;
-};
-
-struct emulator_config {
-    double beep_frequency;
-    int window_width;
-    int window_height;
-    int beep_amplitude;
-    char *const rom_path;
 };
 
 void beep_samples_generator(void *config_v, uint8_t *stream, int len) {     
@@ -129,6 +118,10 @@ int sdl_platform_init(struct sdl_platform *const platform, const struct emulator
 int main(int argc, char **argv) { 
     struct emulator_config config;
     struct sdl_platform platform;
+    if (!emulator_config_initialise_from_args(&config, argc, argv)) {
+        return EXIT_FAILURE;
+    }
+
     if (sdl_platform_init(&platform, &config)) { 
         return EXIT_FAILURE;
     };
