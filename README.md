@@ -1,10 +1,15 @@
 # chip8-emulator
 
 ## Summary
-An implementation of a CHIP-8 emulator/interpreter written in C and using SDL2 for graphics and sound. This CHIP8 emulator follows the behaviour suggested in [Langhoff's Guide to making a CHIP-8 emulator](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/) largely targetting that of the original COSMAC VIP interpreter but with configurable "quirk" behaviour where needed. This project is not complete yet nor perfect and more features will be documented as they are implemented..
+An implementation of a CHIP-8 emulator/interpreter written in C and using SDL2 for graphics and sound. This CHIP8 emulator follows the behaviour suggested in [Langhoff's Guide to making a CHIP-8 emulator](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/) largely targetting that of the original COSMAC VIP interpreter but with configurable "quirk" behaviour where needed. This project is not complete yet nor perfect and more features will be documented as they are implemented.
 
-### Prerequisites:
-- This project has not been tested on all platforms. Presumes a UNIX-like environment.
+Here are some gifs and pictures of my emulator in action with a selection of ROMs that I found on the internet. (**The flickering when sprites move happens due to how CHIP-8 draws sprites to the screen**)
+![Breakout ROM being emulated](assets/imgs/breakout.gif)
+![IBM Logo Chip 8](assets/imgs/IBM.png)
+    ![Pong ROM being emulated](assets/imgs/pong.gif)
+
+    ### Prerequisites:
+    - This project has not been tested on all platforms. Presumes a UNIX-like environment.
 - Requires GNU Make.
 - Requires GCC.
 - Requires SDL2.
