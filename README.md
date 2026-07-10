@@ -1,7 +1,7 @@
 # chip8-emulator
 
 ## Summary
-An implementation of a CHIP-8 emulator/interpreter written in C and using SDL2 for graphics and sound. This CHIP8 emulator follows the behaviour suggested in [Langhoff's Guide to making a CHIP-8 emulator](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/) largely targetting that of the original COSMAC VIP interpreter but with configurable "quirk" behaviour where needed. This project is not complete yet nor perfect and more features will be documented as they are implemented.
+An implementation of a CHIP-8 emulator/interpreter written in C and using SDL2 for graphics and sound. This CHIP8 emulator follows the behaviour suggested in [Langhoff's Guide to making a CHIP-8 emulator](https://tobiasvl.github.io/blog/write-a-chip-8-emulator/) but with configurable "quirk" behaviour where needed. This project is not complete yet nor perfect and more features will be documented as they are implemented.
 
 Here are some gifs and pictures of my emulator in action with a selection of ROMs that I found on the internet. (**The flickering when sprites move happens due to how CHIP-8 draws sprites to the screen**)
 ![Breakout ROM being emulated](assets/imgs/breakout.gif)
@@ -41,10 +41,10 @@ $ ./chip8-emulator <FILE PATH TO ROM> <FLAGS>
 ### Quirk Flags
 | Flag | Instructions Affected | Behaviour when enabled | 
 |------|-----------------------|-------------|
-| `--q-arith-instr-overflow-reset` | `LD_V_V`, `OR_V_V`, `AND_V_V`, `XOR_V_V` | Arithmetic instructions that do not set a meaningful value in VF will set VF = 0. Behaviour seen in the COSMAC VIP interpreter.
-| `--q-shift-only-vx` | `SHR_V_V`, `SHL_V_V` |Bitshift instructions work in-place on VX instead of copying VY into VX and then bitshifting. This quirk is seen on CHIP-48 and SUPERCHIP.|
-| `--q-add-to-index-overflow` | `ADD_I_V` |If the updated index register value is an address outside of the normal addressing range, VF is set to 1. This quirk is seen in the CHIP-8 interpreter for the Amiga.|
-| `--q-store-load-increment-index` | `LD_I_V`, `LD_V_I` | Quirk seen in the COSMAC VIP interpreter. Storing to and loading registers from memory would increment the index register value, setting the value of `I` to `I + X + 1` by the end of the operation. Modern interpreters use a temporary variable instead of actually incrementing the index register.|
+| `--q-1` | `LD_V_V`, `OR_V_V`, `AND_V_V`, `XOR_V_V` | Arithmetic instructions that do not set a meaningful value in VF will set VF = 0. Behaviour seen in the COSMAC VIP interpreter.
+| `--q-2` | `SHR_V_V`, `SHL_V_V` |Bitshift instructions work in-place on VX instead of copying VY into VX and then bitshifting. This quirk is seen on CHIP-48 and SUPERCHIP.|
+| `--q-3` | `ADD_I_V` |If the updated index register value is an address outside of the normal addressing range, VF is set to 1. This quirk is seen in the CHIP-8 interpreter for the Amiga.|
+| `--q-4` | `LD_I_V`, `LD_V_I` | Quirk seen in the COSMAC VIP interpreter. Storing to and loading registers from memory would increment the index register value, setting the value of `I` to `I + X + 1` by the end of the operation. Modern interpreters use a temporary variable instead of actually incrementing the index register.|
 
 For example,
 ```bash

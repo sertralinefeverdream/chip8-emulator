@@ -37,10 +37,10 @@
 #define FLAG_TIMER_DECREASE_RATE "-t"
 
 // Command Line Quirk Flags
-#define FLAG_Q_ARITH_INSTR_OVERFLOW_RESET "--q-arith-instr-overflow-reset"
-#define FLAG_Q_SHIFT_ONLY_VX "--q-shift-only-vx"
-#define FLAG_Q_ADD_TO_INDEX_OVERFLOW "--q-add-to-index-overflow"
-#define FLAG_Q_STORE_LOAD_INCREMENT_INDEX "--q-store-load-increment-index"
+#define FLAG_Q_ARITH_INSTR_OVERFLOW_RESET "--q-1"
+#define FLAG_Q_SHIFT_ONLY_VX "--q-2"
+#define FLAG_Q_ADD_TO_INDEX_OVERFLOW "--q-3"
+#define FLAG_Q_STORE_LOAD_INCREMENT_INDEX "--q-4"
 
 struct emulator_config {
     double beep_frequency;
