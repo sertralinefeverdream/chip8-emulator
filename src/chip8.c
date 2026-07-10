@@ -24,7 +24,7 @@ void chip8_machine_load_font(struct chip8_machine *const m, const uint8_t fontse
     }
 }
 
-void chip8_machine_register_key(struct chip8_machine *const m, uint8_t key, uint8_t down) {
+void chip8_machine_register_key(struct chip8_machine *const m, uint8_t key, const uint8_t down) {
     if (key > KEYPAD_SIZE - 1) {
         return;
     }
@@ -58,7 +58,7 @@ int chip8_machine_load_rom_file(struct chip8_machine *const m, const char *const
     }
     
     fseek(rom, 0, SEEK_END);
-    long rom_size = ftell(rom) + 1;
+    const long rom_size = ftell(rom) + 1;
     if (rom_size > CHIP8_PROGRAM_MAX_SIZE) {
         fclose(rom); 
         return ERR_ROM_TOO_LARGE; 
@@ -284,14 +284,14 @@ static int exec_instr_display(struct chip8_machine *const m) {
             continue;
         }
 
-        uint8_t sprite = m->memory[m->i + j];
+        const uint8_t sprite = m->memory[m->i + j];
         for (size_t k = 0; k < 8; ++k) {            
             if (x + k > CHIP8_DISPLAY_WIDTH - 1) {
                 continue;
             }
             
-            uint8_t display_pixel = m->display[DISPLAY_INDEX(x+k, y+j)];
-            uint8_t sprite_pixel = (sprite >> (7-k)) & 0x1; 
+            const uint8_t display_pixel = m->display[DISPLAY_INDEX(x+k, y+j)];
+            const uint8_t sprite_pixel = (sprite >> (7-k)) & 0x1; 
             // printf("Sprite pixel: %d Sprite: %d\n", sprite_pixel, sprite);
             if (display_pixel && sprite_pixel) {
                 m->v[FLAG_REGISTER_INDEX] = 1;
@@ -434,7 +434,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             if (!m->quirks.q_shift_only_vx) {
                 m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
             }
-            uint8_t shifted_bit = m->v[m->current_instruction.x] & 0x1;
+            const uint8_t shifted_bit = m->v[m->current_instruction.x] & 0x1;
             m->v[m->current_instruction.x] >>= 1;
             m->v[FLAG_REGISTER_INDEX] = shifted_bit;
             break;
@@ -445,7 +445,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             if (!m->quirks.q_shift_only_vx) {
                 m->v[m->current_instruction.x] = m->v[m->current_instruction.y];
             }
-            uint8_t shifted_bit = m->v[m->current_instruction.x] >> 7;
+            const uint8_t shifted_bit = m->v[m->current_instruction.x] >> 7;
             m->v[m->current_instruction.x] <<= 1;
             m->v[FLAG_REGISTER_INDEX] = shifted_bit;
             break;
@@ -475,7 +475,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             break;
             
         case SKP_V: {
-            uint8_t key = m->v[m->current_instruction.x];
+            const uint8_t key = m->v[m->current_instruction.x];
             if (key > 0xF) { // Replace magic number with macro?
                 return ERR_INVALID_KEYCODE;                
             }
@@ -487,7 +487,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         }
         
         case SKNP_V: {
-            uint8_t key = m->v[m->current_instruction.x];
+            const uint8_t key = m->v[m->current_instruction.x];
             if (key > 0xF) {
                 return ERR_INVALID_KEYCODE;
             }
