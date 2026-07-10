@@ -5,11 +5,14 @@
 #include <SDL2/SDL.h>
 #include <math.h>
 
+#define PI 3.14159265358979323846
+
 void sine_wave_sample(void *config_v, uint8_t *stream, int len) {     
     static unsigned time = 0;
     const struct emulator_config *config = (struct emulator_config*) config_v;
     for (size_t i = 0; i < (size_t)len; ++i) { 
-        stream[i] = BEEP_AMPLITUDE * sin(config->beep_frequency * 2 * time * 1/44100.0);
+        double x = time * 1/44100.0;
+        stream[i] = BEEP_AMPLITUDE * sin(2 * PI * config->beep_frequency * x);
         time++;
     }
 }
