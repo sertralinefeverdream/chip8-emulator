@@ -8,8 +8,8 @@ Here are some gifs and pictures of my emulator in action with a selection of ROM
 ![IBM Logo Chip 8](assets/imgs/IBM.png)
     ![Pong ROM being emulated](assets/imgs/pong.gif)
 
-    ### Prerequisites:
-    - This project has not been tested on all platforms. Presumes a UNIX-like environment.
+### Prerequisites:
+- This project has not been tested on all platforms. Presumes a UNIX-like environment.
 - Requires GNU Make.
 - Requires GCC.
 - Requires SDL2.
