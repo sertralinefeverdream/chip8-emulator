@@ -78,9 +78,9 @@ int chip8_machine_fetch_and_decode(struct chip8_machine *const m) {
         return ERR_FETCH_OUT_OF_BOUNDS;
     }
 
-    uint16_t instr = ((uint16_t)(m->memory[m->pc])) << 8 | (uint16_t) m->memory[m->pc + 1]; // Combine 8-bit memory[pc] and memory[pc+1] into single 2 byte instr
+    const uint16_t instr = ((uint16_t)(m->memory[m->pc])) << 8 | (uint16_t) m->memory[m->pc + 1]; // Combine 8-bit memory[pc] and memory[pc+1] into single 2 byte instr
     //printf("Instruction: %x\n", instr);
-    uint8_t opcode = (uint8_t)((instr & 0xF000) >> 12);
+    const uint8_t opcode = (uint8_t)((instr & 0xF000) >> 12);
     m->current_instruction.x = (uint8_t)((instr & 0x0F00) >> 8); 
     m->current_instruction.y = (uint8_t)((instr & 0x00F0) >> 4);
     m->current_instruction.n = (uint8_t)((instr & 0x000F));
@@ -511,9 +511,8 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             break;
         
         case ADD_I_V:
-            // Follows suggested Amiga interpreter behaviour
             m->i += m->v[m->current_instruction.x];
-            if (m->quirks.q_add_to_index_overflow || m->v[m->current_instruction.x] > CHIP8_PROGRAM_FINAL - m->i) {
+            if (m->quirks.q_add_to_index_overflow && m->i > CHIP8_PROGRAM_FINAL) {
                 m->v[FLAG_REGISTER_INDEX] = 1;
             }
             break;
@@ -552,7 +551,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
             break;
         
         case LD_I_V: {
-            uint8_t r = m->current_instruction.x;
+            const uint8_t r = m->current_instruction.x;
             if (r > CHIP8_NUM_V_REGISTERS - 1 || m->i + r > CHIP8_PROGRAM_FINAL) {
                 return ERR_INVALID_MEMORY_ADDR;
             }
@@ -569,7 +568,7 @@ int chip8_machine_execute(struct chip8_machine *const m) {
         }
 
         case LD_V_I: {
-            uint8_t r = m->current_instruction.x;
+            const uint8_t r = m->current_instruction.x;
             if (r > CHIP8_NUM_V_REGISTERS - 1 || m->i + r > CHIP8_PROGRAM_FINAL) {
                 return ERR_INVALID_MEMORY_ADDR;
             }
