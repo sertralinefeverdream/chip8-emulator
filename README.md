@@ -48,7 +48,7 @@ $ ./chip8-emulator <FILE PATH TO ROM> <FLAGS>
 
 For example,
 ```bash
-$ ./chip8-emulator MyRom.ch8 --q-arith-instr-overflow-reset --q-shift-only-vx --q-store-load-increment-index
+$ ./chip8-emulator MyRom.ch8 --q-1 --q-4
 ```
 May more accurately simulate the behaviour of the original COSMAC VIP CHIP-8 interpreter and may be useful for compatibility with original ROMs.
 
