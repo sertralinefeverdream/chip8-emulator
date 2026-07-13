@@ -31,9 +31,8 @@ int emulator_config_initialise_from_args(struct emulator_config *const ec, int a
         return ERR_MISSING_ARGUMENT;
     }
    
-    ec->rom_path = argv[1];
-    
     // Code recycled from my CGOL project
+    ec->rom_path = argv[1];
     for (int i = 2; i < argc; ++i) { 
         if (!strcmp(argv[i], FLAG_WINDOW_WIDTH)) { 
             errno = 0;

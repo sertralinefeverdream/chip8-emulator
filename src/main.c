@@ -109,8 +109,6 @@ int main(int argc, char **argv) {
         return EXIT_FAILURE;
     }
     
-    //printf("%d \t %d \n", m->quirks.q_store_load_increment_index, q.q_store_load_increment_index);
-
     chip8_machine_load_font(m, fontset);
 
     if (chip8_machine_load_rom_file(m, config.rom_path) != ROM_LOAD_SUCCESS) { 
@@ -137,10 +135,10 @@ int main(int argc, char **argv) {
             }
         }
        
-        update_keypad(key_states, m);
         
         uint32_t now = SDL_GetTicks();
         if (now - last_instr_exec >= 1000 / config.instr_per_second) { 
+            update_keypad(key_states, m);
             last_instr_exec = now;
             int fetch_return = chip8_machine_fetch_and_decode(m);
             if (fetch_return) {
